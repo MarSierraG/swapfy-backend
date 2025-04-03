@@ -2,6 +2,7 @@ package com.swapfy.backend.controllers;
 
 import com.swapfy.backend.models.User;
 import com.swapfy.backend.services.AuthService;
+import com.swapfy.backend.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,23 +12,32 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, JwtUtil jwtUtil) {
         this.authService = authService;
+        this.jwtUtil = jwtUtil;
     }
 
-    // Endpoint para registrar un nuevo usuario
+    // Registro
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody User user) {
         User registeredUser = authService.registerUser(user);
         return ResponseEntity.ok(registeredUser);
     }
 
-    // Endpoint para iniciar sesión
+    // Login que devuelve JWT
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody User user) {
-        User loggedInUser = authService.login(user.getEmail(), user.getPassword());
-        return ResponseEntity.ok(loggedInUser);
+    public ResponseEntity<?> login(@RequestBody User user) {
+        User validUser = authService.login(user.getEmail(), user.getPassword());
+
+        if (validUser == null) {
+            return ResponseEntity.status(401).body("Credenciales inválidas ❌");
+        }
+
+        String token = jwtUtil.generateToken(validUser.getEmail());
+
+        return ResponseEntity.ok().body("{\"token\":\"" + token + "\"}");
     }
 }

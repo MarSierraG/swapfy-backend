@@ -1,13 +1,14 @@
 package com.swapfy.backend.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-@Data // Genera automáticamente getters, setters, toString, equals y hashCode
+@Data
 public class User {
 
     @Id
@@ -15,29 +16,23 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(nullable = false, length = 100)
+    @NotBlank(message = "El nombre no puede estar vacío")
     private String name;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Email(message = "El email no es válido")
+    @NotBlank(message = "El email no puede estar vacío")
     private String email;
 
-    @Column(nullable = false, length = 255)
-    private String password; // Contraseña encriptada
+    @NotBlank(message = "La contraseña no puede estar vacía")
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
+    private String password;
 
-    @Column(length = 100)
     private String location;
 
-    @Column(length = 100)
     private String biography;
 
-    @Column(nullable = false)
-    private Integer credits = 0; // Créditos iniciales en 0
+    @Min(value = 0, message = "Los créditos no pueden ser negativos")
+    private Integer credits;
 
-    @Column(name = "registration_date", nullable = false, updatable = false)
     private LocalDateTime registrationDate;
-
-    // Constructor vacío (necesario para JPA)
-    public User() {
-        this.registrationDate = LocalDateTime.now(); // Fecha de registro automática
-    }
 }

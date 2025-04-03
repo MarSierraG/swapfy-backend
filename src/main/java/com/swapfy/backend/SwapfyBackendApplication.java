@@ -13,8 +13,4 @@ public class SwapfyBackendApplication {
         SpringApplication.run(SwapfyBackendApplication.class, args);
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 }
