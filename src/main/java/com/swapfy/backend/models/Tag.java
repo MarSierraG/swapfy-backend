@@ -2,6 +2,10 @@ package com.swapfy.backend.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import java.util.List;
 
 @Entity
 @Table(name = "tags")
@@ -16,12 +20,20 @@ public class Tag {
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
-    // Constructor vacío (necesario para JPA)
+    // Relación con Item (bidireccional)
+    @ManyToMany(mappedBy = "tags")
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private List<Item> items;
+
     public Tag() {
     }
 
-    // Constructor con parámetro para facilitar la creación de tags con nombre
     public Tag(String name) {
         this.name = name;
+    }
+
+    public Tag(Long tagId) {
+        this.tagId = tagId;
     }
 }

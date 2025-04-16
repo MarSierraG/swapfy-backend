@@ -23,7 +23,7 @@ public class ItemService {
         return itemRepository.findAll();
     }
 
-    // Obtener artículo por ID
+    // Obtener un artículo por ID
     public Optional<Item> getItemById(Long id) {
         return itemRepository.findById(id);
     }
@@ -41,7 +41,7 @@ public class ItemService {
             item.setTitle(itemDetails.getTitle());
             item.setDescription(itemDetails.getDescription());
             item.setCreditValue(itemDetails.getCreditValue());
-            item.setAvailable(itemDetails.isAvailable()); // AQUÍ estaba el error
+            item.setStatus(itemDetails.getStatus()); // Usamos setStatus en lugar de setAvailable
             item.setType(itemDetails.getType());
             item.setTags(itemDetails.getTags());
             return itemRepository.save(item);
@@ -55,18 +55,28 @@ public class ItemService {
         itemRepository.deleteById(id);
     }
 
-    // Obtener solo artículos disponibles
+    // Obtener artículos disponibles
     public List<Item> getAvailableItems() {
-        return itemRepository.findByAvailableTrue();
+        return itemRepository.findByStatus("Available");
     }
 
     // Actualizar disponibilidad
-    public Optional<Item> updateAvailability(Long id, boolean isAvailable) {
+    public Optional<Item> updateAvailability(Long id, String status) {
         Optional<Item> optionalItem = itemRepository.findById(id);
         optionalItem.ifPresent(item -> {
-            item.setAvailable(isAvailable);
+            item.setStatus(status); // Cambiamos de 'setAvailable' a 'setStatus'
             itemRepository.save(item);
         });
         return optionalItem;
+    }
+
+    // Verificar si el usuario está autorizado para eliminar el artículo
+    public boolean isUserAuthorizedToDelete(Long itemId) {
+        Optional<Item> item = itemRepository.findById(itemId);
+        if (item.isPresent()) {
+            Item foundItem = item.get();
+            return foundItem.getUser().getUserId().equals(itemId); // Verifica si el usuario tiene permisos
+        }
+        return false;
     }
 }

@@ -5,7 +5,10 @@ import com.swapfy.backend.services.AuthService;
 import com.swapfy.backend.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -22,7 +25,12 @@ public class AuthController {
 
     // Registro
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@Valid @RequestBody User user, BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
+
+        // Si no hay errores, registra el usuario
         User registeredUser = authService.registerUser(user);
         return ResponseEntity.ok(registeredUser);
     }

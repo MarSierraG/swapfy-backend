@@ -7,6 +7,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    // Métodos adicionales si los necesitas, por ejemplo:
-    // List<Transaction> findByStatus(String status);
 }

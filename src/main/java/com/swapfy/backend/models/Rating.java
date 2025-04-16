@@ -2,7 +2,6 @@ package com.swapfy.backend.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,11 +15,11 @@ public class Rating {
     private Long ratingId;
 
     @ManyToOne
-    @JoinColumn(name = "rater_id", nullable = false)
+    @JoinColumn(name = "rater_user_id", nullable = false)
     private User rater;
 
     @ManyToOne
-    @JoinColumn(name = "rated_id", nullable = false)
+    @JoinColumn(name = "rated_user_id", nullable = false)
     private User rated;
 
     @Column(nullable = false)
@@ -29,7 +28,7 @@ public class Rating {
     @Column(length = 300)
     private String comment;
 
-    @Column(name = "rated_at", nullable = false, updatable = false)
+    @Column(name = "date", nullable = false, updatable = false)
     private LocalDateTime ratedAt;
 
     @PrePersist

@@ -4,6 +4,7 @@ import com.swapfy.backend.models.Tag;
 import com.swapfy.backend.services.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,22 +34,25 @@ public class TagController {
         return tag.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Crear una nueva etiqueta
+    // Crear una nueva etiqueta (solo para ADMIN)
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Tag> createTag(@RequestBody Tag tag) {
         Tag createdTag = tagService.createTag(tag);
         return ResponseEntity.status(201).body(createdTag);
     }
 
-    // Actualizar una etiqueta existente
+    // Actualizar una etiqueta (solo para ADMIN)
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Tag> updateTag(@PathVariable Long id, @RequestBody Tag tagDetails) {
         Tag updatedTag = tagService.updateTag(id, tagDetails);
         return ResponseEntity.ok(updatedTag);
     }
 
-    // Eliminar una etiqueta
+    // Eliminar una etiqueta (solo para ADMIN)
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteTag(@PathVariable Long id) {
         tagService.deleteTag(id);
         return ResponseEntity.noContent().build();

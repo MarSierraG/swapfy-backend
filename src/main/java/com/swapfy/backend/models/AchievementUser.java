@@ -2,7 +2,6 @@ package com.swapfy.backend.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,7 +22,7 @@ public class AchievementUser {
     @JoinColumn(name = "achievement_id", nullable = false)
     private Achievement achievement;
 
-    @Column(name = "unlocked_at", nullable = false)
+    @Column(name = "date_achieved", nullable = false)
     private LocalDateTime unlockedAt;
 
     @PrePersist

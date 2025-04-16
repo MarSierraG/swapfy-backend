@@ -13,7 +13,7 @@ public class Achievement {
     @Column(name = "achievement_id")
     private Long achievementId;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(name = "title", nullable = false, unique = true, length = 100)
     private String name;
 
     @Column(length = 255)

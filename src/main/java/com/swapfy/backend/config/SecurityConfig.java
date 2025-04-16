@@ -33,7 +33,19 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Permitir acceso sin token a endpoints de autenticación
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // Hacer públicos los endpoints que no necesiten protección (para pruebas)
+                        // .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
+
+
+                        // Restringir acciones de administración solo a ADMIN:
+                        .requestMatchers("/api/tags/**").hasRole("ADMIN")
+                        .requestMatchers("/api/transactions/**").hasRole("ADMIN")
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
+
+                        // Otros endpoints requieren autenticación
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

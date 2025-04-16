@@ -1,8 +1,8 @@
 package com.swapfy.backend.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,17 +16,18 @@ public class Message {
     private Long messageId;
 
     @ManyToOne
-    @JoinColumn(name = "sender_id", nullable = false)
+    @JoinColumn(name = "sender_user_id", nullable = false)
     private User sender;
 
     @ManyToOne
-    @JoinColumn(name = "receiver_id", nullable = false)
+    @JoinColumn(name = "receiver_user_id", nullable = false)
     private User receiver;
 
+    @NotBlank(message = "El contenido del mensaje no puede estar vacío")
     @Column(nullable = false, length = 500)
     private String content;
 
-    @Column(name = "sent_at", nullable = false, updatable = false)
+    @Column(name = "timestamp", nullable = false, updatable = false)
     private LocalDateTime sentAt;
 
     @PrePersist

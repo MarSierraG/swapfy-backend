@@ -11,6 +11,10 @@ import java.util.List;
 @Data
 public class Item {
 
+    public Item() {
+        // Constructor vacío para JPA
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_id")
@@ -29,7 +33,7 @@ public class Item {
     @Column(nullable = false, length = 255)
     private String description;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(
             name = "item_tags",
             joinColumns = @JoinColumn(name = "item_id"),
@@ -41,17 +45,15 @@ public class Item {
     private Integer creditValue;
 
     @Column(nullable = false)
-    private boolean available = true;
+    private String status = "Available";  // Usar 'status' en lugar de 'available'
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "publication_date", nullable = false, updatable = false)
+    private LocalDateTime publicationDate;  // Usar publication_date en lugar de created_at
 
-    public Item() {
-        // Constructor vacío requerido por JPA
-    }
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.publicationDate = LocalDateTime.now();  // Asignamos la fecha a publicationDate
     }
+
 }

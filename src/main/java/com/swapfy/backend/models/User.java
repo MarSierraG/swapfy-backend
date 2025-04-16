@@ -3,7 +3,6 @@ package com.swapfy.backend.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,11 +27,19 @@ public class User {
     private String password;
 
     private String location;
-
     private String biography;
 
     @Min(value = 0, message = "Los créditos no pueden ser negativos")
     private Integer credits;
 
     private LocalDateTime registrationDate;
+
+    // Campo de rol, por ejemplo "USER" o "ADMIN"
+    @NotBlank(message = "El rol es obligatorio")
+    private String role;
+
+    @PrePersist
+    protected void onCreate() {
+        this.registrationDate = LocalDateTime.now();
+    }
 }

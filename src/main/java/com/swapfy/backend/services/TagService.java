@@ -46,8 +46,15 @@ public class TagService {
     public void deleteTag(Long id) {
         Tag tag = tagRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Etiqueta no encontrada"));
+
+        // Verifica si la etiqueta está en uso en algún ítem
+        if (!tag.getItems().isEmpty()) {
+            throw new RuntimeException("No se puede eliminar la etiqueta porque está en uso.");
+        }
+
         tagRepository.delete(tag);
     }
+
 
     // Obtener etiquetas predeterminadas
     public List<Tag> getDefaultTags() {
