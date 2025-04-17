@@ -33,19 +33,27 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Permitir acceso sin token a endpoints de autenticación
+
+                        // Endpoints públicos (autenticación)
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // Hacer públicos los endpoints que no necesiten protección (para pruebas)
-                        // .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
+                        // Crear/Modificar/Borrar transacciones: solo admin
+                        .requestMatchers(HttpMethod.POST, "/api/transactions/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/transactions/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/transactions/**").hasRole("ADMIN")
 
+                        // Ver transacciones personales: usuario autenticado (se filtra en el backend)
+                        .requestMatchers(HttpMethod.GET, "/api/transactions/user/**").authenticated()
 
-                        // Restringir acciones de administración solo a ADMIN:
-                        .requestMatchers("/api/tags/**").hasRole("ADMIN")
+                        // Cualquier otro /transactions → solo admin
                         .requestMatchers("/api/transactions/**").hasRole("ADMIN")
-                        .requestMatchers("/api/users/**").hasRole("ADMIN")
 
-                        // Otros endpoints requieren autenticación
+                        // Otros recursos protegidos
+                        .requestMatchers("/api/tags/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**").authenticated()
+
+
+                        // Resto de endpoints → requieren autenticación
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

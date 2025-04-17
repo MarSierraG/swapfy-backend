@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
 @Service
 public class RatingService {
 
@@ -27,6 +26,12 @@ public class RatingService {
     }
 
     public Rating createRating(Rating rating) {
+        // Validar que el score esté entre 1 y 5
+        int score = rating.getScore();
+        if (score < 1 || score > 5) {
+            throw new IllegalArgumentException("La puntuación debe estar entre 1 y 5.");
+        }
+
         return ratingRepository.save(rating);
     }
 

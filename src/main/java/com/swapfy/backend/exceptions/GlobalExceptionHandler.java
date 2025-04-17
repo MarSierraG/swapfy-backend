@@ -64,14 +64,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
-    // RuntimeException personalizada (por ejemplo, etiqueta en uso)
+    // RuntimeException personalizada (etiqueta en uso o logro duplicado)
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
-        if (ex.getMessage().contains("está en uso")) {
-            ErrorResponse response = new ErrorResponse("Error de eliminación", ex.getMessage(), "Etiqueta en uso");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        String msg = ex.getMessage();
+
+        if (msg.contains("está en uso")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ErrorResponse("Error de eliminación", msg, "Etiqueta en uso")
+            );
         }
-        // Reenvía al error genérico
+
+        if (msg.contains("desbloqueado")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ErrorResponse("Error de validación", msg, "Este logro ya está asignado a este usuario.")
+            );
+        }
+
+        // Si no encaja, envía al genérico
         return handleAllExceptions(ex);
     }
 

@@ -33,8 +33,9 @@ public class RatingController {
 
     @PostMapping
     public Rating createRating(@RequestBody Rating rating) {
-        return ratingService.createRating(rating);
+        return ratingService.createRating(rating); // ✅ delegamos al servicio, que sí tiene el repo
     }
+
 
     @GetMapping("/given/{userId}")
     public List<Rating> getRatingsGivenByUser(@PathVariable Long userId) {

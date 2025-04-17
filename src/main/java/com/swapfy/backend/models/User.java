@@ -3,7 +3,9 @@ package com.swapfy.backend.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -34,9 +36,13 @@ public class User {
 
     private LocalDateTime registrationDate;
 
-    // Campo de rol, por ejemplo "USER" o "ADMIN"
-    @NotBlank(message = "El rol es obligatorio")
-    private String role;
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
+
+    // Asociación con ítems: si el usuario se borra, se borran sus ítems
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Item> items;
 
     @PrePersist
     protected void onCreate() {

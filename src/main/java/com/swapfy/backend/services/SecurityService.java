@@ -26,13 +26,14 @@ public class SecurityService {
         String email;
 
         if (principal instanceof UserDetails userDetails) {
-            email = userDetails.getUsername(); // Aquí extraemos el email correctamente
+            email = userDetails.getUsername(); // extrae el email
         } else if (principal instanceof String str) {
             email = str;
         } else {
-            return null; // Tipo desconocido
+            return null; // tipo desconocido
         }
 
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmail(email).orElse(null); // adaptado a Optional
     }
+
 }

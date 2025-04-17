@@ -23,6 +23,15 @@ public class AchievementUserService {
     }
 
     public AchievementUser unlockAchievement(AchievementUser achievementUser) {
+        boolean alreadyUnlocked = achievementUserRepository.existsByUserAndAchievement(
+                achievementUser.getUser(),
+                achievementUser.getAchievement()
+        );
+
+        if (alreadyUnlocked) {
+            throw new RuntimeException("Este logro ya ha sido desbloqueado por el usuario.");
+        }
+
         return achievementUserRepository.save(achievementUser);
     }
 }

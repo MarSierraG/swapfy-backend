@@ -69,4 +69,9 @@ public class TransactionService {
     public void deleteTransaction(Long id) {
         transactionRepository.deleteById(id);
     }
+
+    public List<Transaction> getTransactionsByUser(Long userId) {
+        return transactionRepository.findByUser1UserIdOrUser2UserId(userId, userId);
+    }
+
 }

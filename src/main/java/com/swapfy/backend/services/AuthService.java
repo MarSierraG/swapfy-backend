@@ -1,22 +1,28 @@
 package com.swapfy.backend.services;
 
+import com.swapfy.backend.models.Role;
 import com.swapfy.backend.models.User;
+import com.swapfy.backend.repositories.RoleRepository;
 import com.swapfy.backend.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     public User registerUser(@Valid User user) {
@@ -33,7 +39,7 @@ public class AuthService {
         }
 
         // Verificar si el email ya está registrado
-        if (userRepository.findByEmail(user.getEmail()) != null) {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("El email ya está registrado");
         }
 
@@ -49,6 +55,11 @@ public class AuthService {
         user.setCredits(100); // inicializar créditos
         user.setRegistrationDate(LocalDateTime.now()); // registrar fecha actual
 
+        // Asignar rol USER por defecto
+        Role userRole = roleRepository.findByName("USER")
+                .orElseThrow(() -> new RuntimeException("Rol USER no encontrado"));
+        user.setRole(userRole);
+
         return userRepository.save(user);
     }
 
@@ -58,16 +69,20 @@ public class AuthService {
             throw new RuntimeException("Email y contraseña son requeridos");
         }
 
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) {
             throw new RuntimeException("Usuario no encontrado");
         }
+
+        User user = optionalUser.get(); // Extraemos el usuario
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Credenciales incorrectas");
         }
 
         return user;
+
+
     }
 
     // Validar si el email es válido

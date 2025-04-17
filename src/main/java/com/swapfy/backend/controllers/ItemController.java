@@ -57,6 +57,9 @@ public class ItemController {
     @PutMapping("/{itemId}")
     public ResponseEntity<?> updateItem(@PathVariable Long itemId, @RequestBody Item itemDetails) {
         User authenticatedUser = securityService.getAuthenticatedUser();
+        String roleName = authenticatedUser.getRole().getName(); // Obtener nombre del rol
+
+
         if (authenticatedUser == null) {
             return ResponseEntity.status(401).body("No autenticado");
         }
@@ -72,10 +75,12 @@ public class ItemController {
         System.out.println("➡️ Usuario autenticado: " + authenticatedUser.getEmail());
         System.out.println("➡️ Rol detectado: " + authenticatedUser.getRole());
 
-        if (!existingItem.getUser().getUserId().equals(authenticatedUser.getUserId()) &&
-                !"ADMIN".equalsIgnoreCase(authenticatedUser.getRole())) {
+        // Solo puede modificar si es ADMIN o dueño del ítem
+        if (!"ADMIN".equalsIgnoreCase(roleName) &&
+                !existingItem.getUser().getUserId().equals(authenticatedUser.getUserId())) {
             throw new ForbiddenException("No puedes actualizar un artículo que no te pertenece");
         }
+
 
         Item updatedItem = itemService.updateItem(itemId, itemDetails);
         return ResponseEntity.ok(updatedItem);
@@ -95,7 +100,8 @@ public class ItemController {
         }
         Item existingItem = existingItemOpt.get();
         if (!existingItem.getUser().getUserId().equals(authenticatedUser.getUserId()) &&
-                !"ADMIN".equalsIgnoreCase(authenticatedUser.getRole())) {
+                !"ADMIN".equalsIgnoreCase(authenticatedUser.getRole().getName()))
+        {
             throw new ForbiddenException("No puedes eliminar un artículo que no te pertenece");
         }
         itemService.deleteItem(itemId);
@@ -129,7 +135,7 @@ public class ItemController {
         Item existingItem = existingItemOpt.get();
 
         if (!existingItem.getUser().getUserId().equals(authenticatedUser.getUserId()) &&
-                !"ADMIN".equalsIgnoreCase(authenticatedUser.getRole())) {
+                !"ADMIN".equalsIgnoreCase(authenticatedUser.getRole().getName())) {
             throw new ForbiddenException("No puedes cambiar la disponibilidad de un artículo que no te pertenece");
         }
 
