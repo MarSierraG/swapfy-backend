@@ -13,9 +13,10 @@ public class JwtUtil {
     private final String SECRET_KEY = "swapfySuperSecretKey1234567890"; // usa una clave larga
 
     // Generar token
-    public String generateToken(String email) {
+    public String generateToken(String email, String name) {
         return Jwts.builder()
                 .setSubject(email)
+                .claim("name", name)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hora
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)

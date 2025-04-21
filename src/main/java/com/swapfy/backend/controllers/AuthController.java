@@ -1,5 +1,7 @@
 package com.swapfy.backend.controllers;
 
+import com.swapfy.backend.dto.LoginResponseDTO;
+import com.swapfy.backend.dto.UserDTO;
 import com.swapfy.backend.models.User;
 import com.swapfy.backend.services.AuthService;
 import com.swapfy.backend.security.JwtUtil;
@@ -44,8 +46,20 @@ public class AuthController {
             return ResponseEntity.status(401).body("Credenciales inválidas ❌");
         }
 
-        String token = jwtUtil.generateToken(validUser.getEmail());
+        String token = jwtUtil.generateToken(validUser.getEmail(), validUser.getName());
 
-        return ResponseEntity.ok().body("{\"token\":\"" + token + "\"}");
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUserId(validUser.getUserId());
+        userDTO.setName(validUser.getName());
+        userDTO.setEmail(validUser.getEmail());
+        userDTO.setLocation(validUser.getLocation());
+        userDTO.setBiography(validUser.getBiography());
+        userDTO.setCredits(validUser.getCredits());
+
+
+        LoginResponseDTO response = new LoginResponseDTO(token, userDTO);
+
+        return ResponseEntity.ok(response);
     }
 }
