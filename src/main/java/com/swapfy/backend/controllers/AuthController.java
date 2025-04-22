@@ -57,7 +57,6 @@ public class AuthController {
         userDTO.setBiography(validUser.getBiography());
         userDTO.setCredits(validUser.getCredits());
 
-
         LoginResponseDTO response = new LoginResponseDTO(token, userDTO);
 
         return ResponseEntity.ok(response);
