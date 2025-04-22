@@ -5,7 +5,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Etapa 2: ejecución
-FROM eclipse-temurin:21-jdk
+FROM openjdk:21-jdk-slim
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
