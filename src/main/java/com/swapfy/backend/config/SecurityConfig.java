@@ -35,7 +35,10 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:4200", "https://swapfy.vercel.app") // Limitar luego a frontend
+                        .allowedOrigins(
+                                "http://localhost:4200",
+                                "https://swapfy-frontend-dyhhk7x2d-marsierrags-projects.vercel.app"
+                        )
                         .allowedMethods("*")
                         .allowedHeaders("*");
             }
