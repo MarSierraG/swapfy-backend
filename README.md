@@ -3,7 +3,7 @@
 **Swapfy Backend** es la API REST desarrollada en Java con Spring Boot que da soporte a la plataforma de trueque digital [Swapfy](https://github.com/MarSierraG/swapfy-frontend).
 
 
-## 🚀 Tecnologías
+## Tecnologías
 
 - Java 17+
 - Spring Boot
@@ -12,7 +12,7 @@
 - Maven
 
 
-## 📦 Funcionalidades
+## Funcionalidades
 
 - Registro y login de usuarios
 - Roles (`USER`, `ADMIN`) con control de permisos
@@ -23,17 +23,17 @@
 - Validaciones personalizadas y manejo de errores
 
 
-## 📁 Estructura de carpetas
+## Estructura de carpetas
 
 src/ ├── controllers/ ├── services/ ├── repositories/ ├── models/ ├── dto/ └── config/
 
 
-## 🧪 Pruebas
+## Pruebas
 
 El backend ha sido testeado con una colección Postman automatizada que valida todas las rutas y funcionalidades con diferentes roles.
 
 
-## 🔗 Frontend relacionado
+## Frontend
 
 Puedes ver el cliente Angular aquí:  
 -> [swapfy-frontend](https://github.com/MarSierraG/swapfy-frontend)
