@@ -35,15 +35,16 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(
+                        .allowedOriginPatterns(
                                 "http://localhost:4200",
-                                "https://swapfy-frontend-dyhhk7x2d-marsierrags-projects.vercel.app"
+                                "https://swapfy-frontend.vercel.app"
                         )
                         .allowedMethods("*")
                         .allowedHeaders("*");
             }
         };
     }
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
