@@ -9,7 +9,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.4.4</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <groupId>com.swapfy</groupId>
@@ -63,6 +63,7 @@
             <version>0.9.1</version>
         </dependency>
 
+        <!-- JAXB -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
@@ -74,18 +75,11 @@
             <version>2.3.3</version>
         </dependency>
 
-        <!-- Dependencia de Hibernate Validator -->
+        <!-- Hibernate Validator -->
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>6.2.0.Final</version> <!-- Última versión compatible -->
-        </dependency>
-
-        <!-- Validación -->
-        <dependency>
-            <groupId>jakarta.validation</groupId>
-            <artifactId>jakarta.validation-api</artifactId>
-            <version>3.0.0</version>
+            <version>6.2.0.Final</version>
         </dependency>
 
         <!-- Testing -->
@@ -132,6 +126,5 @@
                 <version>3.2.0</version>
             </plugin>
         </plugins>
-
     </build>
 </project>
