@@ -4,6 +4,8 @@ import com.swapfy.backend.models.Item;
 import com.swapfy.backend.repositories.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.swapfy.backend.models.Tag;
+import com.swapfy.backend.repositories.TagRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,10 +14,16 @@ import java.util.Optional;
 public class ItemService {
 
     private final ItemRepository itemRepository;
+    private final TagRepository tagRepository;
 
     @Autowired
-    public ItemService(ItemRepository itemRepository) {
+    public ItemService(ItemRepository itemRepository, TagRepository tagRepository) {
         this.itemRepository = itemRepository;
+        this.tagRepository = tagRepository;
+    }
+
+    public List<Tag> findTagsByIds(List<Long> ids) {
+        return tagRepository.findAllById(ids);
     }
 
     // Obtener todos los artículos
@@ -29,7 +37,7 @@ public class ItemService {
     }
 
     // Crear artículo
-    public Item createItem(Item item) {
+    public Item saveItem(Item item) {
         return itemRepository.save(item);
     }
 
@@ -41,7 +49,7 @@ public class ItemService {
             item.setTitle(itemDetails.getTitle());
             item.setDescription(itemDetails.getDescription());
             item.setCreditValue(itemDetails.getCreditValue());
-            item.setStatus(itemDetails.getStatus()); // Usamos setStatus en lugar de setAvailable
+            item.setStatus(itemDetails.getStatus());
             item.setType(itemDetails.getType());
             item.setTags(itemDetails.getTags());
             return itemRepository.save(item);
@@ -64,7 +72,7 @@ public class ItemService {
     public Optional<Item> updateAvailability(Long id, String status) {
         Optional<Item> optionalItem = itemRepository.findById(id);
         optionalItem.ifPresent(item -> {
-            item.setStatus(status); // Cambiamos de 'setAvailable' a 'setStatus'
+            item.setStatus(status);
             itemRepository.save(item);
         });
         return optionalItem;

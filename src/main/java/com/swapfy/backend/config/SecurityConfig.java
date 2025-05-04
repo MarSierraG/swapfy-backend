@@ -29,23 +29,23 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // CORS: habilita múltiples orígenes con credentials
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(
+                        .allowedOriginPatterns(
                                 "http://localhost:4200",
                                 "https://swapfy-frontend.vercel.app"
                         )
-                        .allowedMethods("*")
-                        .allowedHeaders("*");
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }
-
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -54,31 +54,34 @@ public class SecurityConfig {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
+                        // Esta línea permite las peticiones preflight CORS (OPTIONS)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         // Endpoints públicos (autenticación)
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // Crear/Modificar/Borrar transacciones: solo admin
+                        // Crear/Modificar/Borrar transacciones de solo admin
                         .requestMatchers(HttpMethod.POST, "/api/transactions/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/transactions/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/transactions/**").hasRole("ADMIN")
 
-                        // Ver transacciones personales: usuario autenticado (se filtra en el backend)
+                        // Ver transacciones personales con usuario autenticado
                         .requestMatchers(HttpMethod.GET, "/api/transactions/user/**").authenticated()
 
-                        // Cualquier otro /transactions → solo admin
+                        // Cualquier otro /transactions , solo admin
                         .requestMatchers("/api/transactions/**").hasRole("ADMIN")
 
                         // Otros recursos protegidos
                         .requestMatchers("/api/tags/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/users/**").authenticated()
 
-
-                        // Resto de endpoints → requieren autenticación
+                        // Resto de endpoints, requieren autenticación
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

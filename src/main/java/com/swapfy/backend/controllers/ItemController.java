@@ -1,13 +1,18 @@
 package com.swapfy.backend.controllers;
 
 import com.swapfy.backend.models.Item;
+import com.swapfy.backend.models.Tag;
 import com.swapfy.backend.models.User;
 import com.swapfy.backend.services.ItemService;
 import com.swapfy.backend.services.SecurityService;
 import com.swapfy.backend.exceptions.ForbiddenException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.swapfy.backend.dto.ItemRequestDTO;
+import com.swapfy.backend.dto.ItemResponseDTO;
+import com.swapfy.backend.mappers.ItemMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,47 +24,61 @@ public class ItemController {
     private final ItemService itemService;
     private final SecurityService securityService;
 
+
     @Autowired
     public ItemController(ItemService itemService, SecurityService securityService) {
         this.itemService = itemService;
         this.securityService = securityService;
     }
 
+
     // Obtener todos los artículos
     @GetMapping
-    public List<Item> getAllItems() {
-        return itemService.getAllItems();
+    public List<ItemResponseDTO> getAllItems() {
+        List<Item> items = itemService.getAllItems();
+        return items.stream()
+                .map(ItemMapper::toDTO)
+                .toList();
     }
+
 
     // Obtener un artículo por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Item> getItemById(@PathVariable Long id) {
+    public ResponseEntity<ItemResponseDTO> getItemById(@PathVariable Long id) {
         Optional<Item> item = itemService.getItemById(id);
-        return item.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return item.map(i -> ResponseEntity.ok(ItemMapper.toDTO(i)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
 
     // Crear un nuevo artículo (solo para el propio usuario autenticado)
     @PostMapping
-    public Item createItem(@RequestBody Item item) {
+    public ResponseEntity<ItemResponseDTO> createItem(@Valid @RequestBody ItemRequestDTO dto) {
         User authenticatedUser = securityService.getAuthenticatedUser();
-
         if (authenticatedUser == null) {
-            throw new ForbiddenException("No estás autenticado");
+            return ResponseEntity.status(401).build();
         }
 
-        // Sobrescribe el usuario con el del token
-        item.setUser(authenticatedUser);
+        // Buscar las etiquetas por ID
+        List<Tag> tags = itemService.findTagsByIds(dto.getTags());
 
-        return itemService.createItem(item);
+        // Mapear a entidad
+        Item item = ItemMapper.toEntity(dto, tags, authenticatedUser);
+
+        // Guardar
+        Item savedItem = itemService.saveItem(item);
+
+        // Mapear respuesta
+        ItemResponseDTO responseDTO = ItemMapper.toDTO(savedItem);
+
+        return ResponseEntity.ok(responseDTO);
     }
+
 
     // Actualizar un artículo existente
     @PutMapping("/{itemId}")
-    public ResponseEntity<?> updateItem(@PathVariable Long itemId, @RequestBody Item itemDetails) {
+    public ResponseEntity<?> updateItem(@PathVariable Long itemId, @Valid @RequestBody ItemRequestDTO dto) {
         User authenticatedUser = securityService.getAuthenticatedUser();
-        String roleName = authenticatedUser.getRole().getName(); // Obtener nombre del rol
-
-
         if (authenticatedUser == null) {
             return ResponseEntity.status(401).body("No autenticado");
         }
@@ -70,21 +89,33 @@ public class ItemController {
         }
 
         Item existingItem = existingItemOpt.get();
+        String roleName = authenticatedUser.getRole().getName();
 
-        // DEBUG
-        System.out.println("➡️ Usuario autenticado: " + authenticatedUser.getEmail());
-        System.out.println("➡️ Rol detectado: " + authenticatedUser.getRole());
-
-        // Solo puede modificar si es ADMIN o dueño del ítem
         if (!"ADMIN".equalsIgnoreCase(roleName) &&
                 !existingItem.getUser().getUserId().equals(authenticatedUser.getUserId())) {
-            throw new ForbiddenException("No puedes actualizar un artículo que no te pertenece");
+            return ResponseEntity.status(403).body("No puedes actualizar un artículo que no te pertenece");
         }
 
+        // Obtener las etiquetas
+        List<Tag> tags = itemService.findTagsByIds(dto.getTags());
 
-        Item updatedItem = itemService.updateItem(itemId, itemDetails);
-        return ResponseEntity.ok(updatedItem);
+        // Actualizar campos del artículo existente
+        existingItem.setTitle(dto.getTitle());
+        existingItem.setDescription(dto.getDescription());
+        existingItem.setCreditValue(dto.getCreditValue());
+        existingItem.setStatus(dto.getStatus());
+        existingItem.setType(dto.getType());
+        existingItem.setTags(tags);
+
+        // Guardar cambios
+        Item updatedItem = itemService.saveItem(existingItem);
+
+        // Preparar respuesta
+        ItemResponseDTO responseDTO = ItemMapper.toDTO(updatedItem);
+
+        return ResponseEntity.ok(responseDTO);
     }
+
 
 
     // Eliminar un artículo
@@ -94,25 +125,33 @@ public class ItemController {
         if (authenticatedUser == null) {
             return ResponseEntity.status(401).body("No autenticado");
         }
-        Optional<Item> existingItemOpt = itemService.getItemById(itemId);
-        if (existingItemOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+
+        Optional<Item> optionalItem = itemService.getItemById(itemId);
+        if (optionalItem.isEmpty()) {
+            return ResponseEntity.status(404).body("Artículo no encontrado");
         }
-        Item existingItem = existingItemOpt.get();
-        if (!existingItem.getUser().getUserId().equals(authenticatedUser.getUserId()) &&
-                !"ADMIN".equalsIgnoreCase(authenticatedUser.getRole().getName()))
-        {
-            throw new ForbiddenException("No puedes eliminar un artículo que no te pertenece");
+
+        Item item = optionalItem.get();
+        boolean isOwner = item.getUser().getUserId().equals(authenticatedUser.getUserId());
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(authenticatedUser.getRole().getName());
+
+        if (!isOwner && !isAdmin) {
+            return ResponseEntity.status(403).body("No puedes eliminar un artículo que no te pertenece");
         }
+
         itemService.deleteItem(itemId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // 204 sin contenido
     }
 
     // Obtener todos los artículos disponibles
     @GetMapping("/available")
-    public List<Item> getAvailableItems() {
-        return itemService.getAvailableItems();
+    public List<ItemResponseDTO> getAvailableItems() {
+        List<Item> items = itemService.getAvailableItems();
+        return items.stream()
+                .map(ItemMapper::toDTO)
+                .toList();
     }
+
 
     @PutMapping("/{itemId}/availability")
     public ResponseEntity<Item> updateItemAvailability(
