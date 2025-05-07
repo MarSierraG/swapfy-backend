@@ -1,5 +1,6 @@
 package com.swapfy.backend.controllers;
 
+import com.swapfy.backend.dto.TagDTO;
 import com.swapfy.backend.models.Tag;
 import com.swapfy.backend.services.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.stream.Collectors.toList;
+
 @RestController
 @RequestMapping("/api/tags")
 public class TagController {
@@ -17,16 +20,17 @@ public class TagController {
     private final TagService tagService;
 
     @Autowired
-    public TagController(TagService tagService) {
+    public TagController(TagService tagService ) {
         this.tagService = tagService;
     }
 
     // Obtener todas las etiquetas
     @GetMapping
-    public List<Tag> getAllTags() {
-        return tagService.getAllTags();
+    public List<TagDTO> getAllTags() {
+        return tagService.getAllTags().stream()
+                .map(tag -> new TagDTO(tag.getTagId(), tag.getName()))
+                .toList();
     }
-
     // Obtener una etiqueta por su ID
     @GetMapping("/{id}")
     public ResponseEntity<Tag> getTagById(@PathVariable Long id) {
