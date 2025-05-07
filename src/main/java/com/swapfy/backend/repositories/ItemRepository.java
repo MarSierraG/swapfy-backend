@@ -9,4 +9,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     // Buscar artículos basados en el estado
     List<Item> findByStatus(String status);
 
+    // Buscar artículos de un usuario específico
+    List<Item> findByUser_UserId(Long userId);
+
+
 }

@@ -36,6 +36,11 @@ public class ItemService {
         return itemRepository.findById(id);
     }
 
+    // Obtener articulos por ID de usuario
+    public List<Item> getItemsByUserId(Long userId) {
+        return itemRepository.findByUser_UserId(userId);
+    }
+
     // Crear artículo
     public Item saveItem(Item item) {
         return itemRepository.save(item);

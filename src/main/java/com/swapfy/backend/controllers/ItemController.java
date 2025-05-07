@@ -51,6 +51,17 @@ public class ItemController {
     }
 
 
+    // Obtener todos los artículos por ID de usuario
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<ItemResponseDTO>> getItemsByUser(@PathVariable Long userId) {
+        List<Item> items = itemService.getItemsByUserId(userId); // <-- lo debes tener en tu servicio
+        List<ItemResponseDTO> dtoList = items.stream()
+                .map(ItemMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(dtoList);
+    }
+
+
     // Crear un nuevo artículo (solo para el propio usuario autenticado)
     @PostMapping
     public ResponseEntity<ItemResponseDTO> createItem(@Valid @RequestBody ItemRequestDTO dto) {
