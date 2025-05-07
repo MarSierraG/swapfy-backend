@@ -18,4 +18,6 @@ public class ItemResponseDTO {
 
     private String userName;
     private List<String> tagNames;
+    private String imageUrl;
+
 }

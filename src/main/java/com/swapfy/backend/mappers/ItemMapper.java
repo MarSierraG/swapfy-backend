@@ -21,6 +21,7 @@ public class ItemMapper {
         item.setType(dto.getType());
         item.setTags(tags);
         item.setUser(user);
+        item.setImageUrl(dto.getImageUrl());
         return item;
     }
 
@@ -35,6 +36,7 @@ public class ItemMapper {
         dto.setType(item.getType());
         dto.setPublicationDate(item.getPublicationDate());
         dto.setUserName(item.getUser().getName());
+        dto.setImageUrl(item.getImageUrl());
 
         dto.setTagNames(item.getTags().stream()
                 .map(Tag::getName)

@@ -28,4 +28,8 @@ public class ItemRequestDTO {
 
     @NotEmpty(message = "Debes seleccionar al menos una etiqueta")
     private List<Long> tags;  // IDs de etiquetas
+
+    @Size(max = 500, message = "La URL de la imagen no puede superar los 500 caracteres")
+    private String imageUrl;
+
 }

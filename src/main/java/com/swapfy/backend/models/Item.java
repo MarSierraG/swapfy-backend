@@ -53,10 +53,12 @@ public class Item {
     @Column(name = "publication_date", nullable = false, updatable = false)
     private LocalDateTime publicationDate;  // Usar publication_date en lugar de created_at
 
-
     @PrePersist
     protected void onCreate() {
         this.publicationDate = LocalDateTime.now();  // Asignamos la fecha a publicationDate
     }
+
+    @Column(name = "image_url")
+    private String imageUrl;
 
 }
