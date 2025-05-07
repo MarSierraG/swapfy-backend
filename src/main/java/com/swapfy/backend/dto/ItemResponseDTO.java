@@ -20,4 +20,5 @@ public class ItemResponseDTO {
     private List<String> tagNames;
     private String imageUrl;
 
+    private Long userId;
 }

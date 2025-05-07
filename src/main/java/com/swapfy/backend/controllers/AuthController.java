@@ -46,7 +46,7 @@ public class AuthController {
             return ResponseEntity.status(401).body("Credenciales inválidas");
         }
 
-        String token = jwtUtil.generateToken(validUser.getEmail(), validUser.getName());
+        String token = jwtUtil.generateToken(user.getEmail(), user.getName(), user.getUserId());
 
 
         UserDTO userDTO = new UserDTO();
