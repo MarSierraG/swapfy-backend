@@ -6,11 +6,18 @@ import com.swapfy.backend.models.User;
 import com.swapfy.backend.services.AuthService;
 import com.swapfy.backend.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import com.swapfy.backend.dto.ResetPasswordRequest;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -57,8 +64,49 @@ public class AuthController {
         userDTO.setBiography(validUser.getBiography());
         userDTO.setCredits(validUser.getCredits());
 
+        List<String> roleNames = List.of(validUser.getRole().getName());
+        userDTO.setRoles(roleNames);
+
+        userDTO.setRoles(roleNames);
+
         LoginResponseDTO response = new LoginResponseDTO(token, userDTO);
 
         return ResponseEntity.ok(response);
     }
+
+    // Resetear contraseña
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request, BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
+
+        boolean success = authService.resetPassword(request.getEmail(), request.getCode(), request.getNewPassword());
+
+        if (success) {
+            return ResponseEntity.ok(Map.of("message", "Contraseña actualizada correctamente"));
+        } else {
+            return ResponseEntity.status(400).body("Código inválido o expirado");
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> sendResetCode(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+
+        boolean success = authService.sendResetCode(email);
+
+        Map<String, String> response = new HashMap<>();
+
+        if (success) {
+            response.put("message", "Código enviado al correo si existe una cuenta con ese email");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "No se encontró ninguna cuenta con ese email");
+            return ResponseEntity.status(404).body(response);
+        }
+    }
+
+
+
 }

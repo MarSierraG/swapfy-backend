@@ -4,6 +4,7 @@ import com.swapfy.backend.models.Role;
 import com.swapfy.backend.models.User;
 import com.swapfy.backend.repositories.RoleRepository;
 import com.swapfy.backend.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,9 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+
+    @Autowired
+    private EmailService emailService;
 
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
@@ -43,12 +47,10 @@ public class AuthService {
             throw new RuntimeException("El email ya está registrado");
         }
 
-        //Por ahora lo dejamos así, para el desarrollo inicial
-
-        // Validar contraseña fuerte
-        //if (!isPasswordStrong(user.getPassword())) {
-        //    throw new RuntimeException("La contraseña debe tener al menos 8 caracteres, un número, una letra y un símbolo.");
-        // }
+      //Validar contraseña fuerte
+        if (!isPasswordStrong(user.getPassword())) {
+            throw new RuntimeException("La contraseña debe tener al menos 8 caracteres, un número, una letra y un símbolo.");
+         }
 
         // Setear contraseña, créditos y fecha de registro
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -97,4 +99,71 @@ public class AuthService {
                 password.matches(".*[a-zA-Z].*") &&   // al menos una letra
                 password.matches(".*[^a-zA-Z0-9].*"); // al menos un símbolo
     }
+
+
+    public boolean resetPassword(String email, String code, String newPassword) {
+        Optional<User> optionalUser = userRepository.findByEmail(email.trim().toLowerCase());
+
+        if (optionalUser.isEmpty()) {
+            return false;
+        }
+
+        User user = optionalUser.get();
+
+        if (!code.equals(user.getResetCode())) {
+            System.out.println("Código incorrecto");
+            System.out.println("Código introducido: " + code);
+            System.out.println("Código guardado: " + user.getResetCode());
+            return false;
+        }
+
+        // Actualizar contraseña
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+
+        // Limpiar código para que no se reutilice
+        user.setResetCode(null);
+
+        userRepository.save(user);
+        return true;
+    }
+
+
+    public boolean sendResetCode(String email) {
+        System.out.println(" Buscando usuario con email: " + email);
+        Optional<User> optionalUser = userRepository.findByEmailIgnoreCase(email.trim());
+
+        if (optionalUser.isEmpty()) {
+            System.out.println(" Usuario no encontrado");
+            return false;
+        }
+
+
+
+        User user = optionalUser.get();
+
+        // Generar código aleatorio de 6 dígitos
+        String code = String.valueOf((int)(Math.random() * 900000) + 100000);
+
+        System.out.println(" Usuario encontrado. Código generado: " + code);
+
+        user.setResetCode(code);
+
+        try {
+            userRepository.save(user);
+            System.out.println(" Código guardado correctamente");
+        } catch (Exception e) {
+            System.out.println(" Error al guardar el código: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+
+        // Enviar correo real ✉️
+        emailService.sendResetCode(email, code);
+
+        return true;
+    }
+
+
+
 }
