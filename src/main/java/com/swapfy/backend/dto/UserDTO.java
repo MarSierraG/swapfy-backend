@@ -1,6 +1,7 @@
 package com.swapfy.backend.dto;
 
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class UserDTO {
@@ -10,4 +11,5 @@ public class UserDTO {
     private String location;
     private String biography;
     private Integer credits;
+    private List<String> roles;
 }

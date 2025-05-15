@@ -1,5 +1,7 @@
 package com.swapfy.backend.controllers;
 
+import com.swapfy.backend.dto.UserDTO;
+import com.swapfy.backend.dto.UserUpdateDTO;
 import com.swapfy.backend.exceptions.ForbiddenException;
 import com.swapfy.backend.models.User;
 import com.swapfy.backend.services.SecurityService;
@@ -48,7 +50,7 @@ public class UserController {
 
     // Actualizar usuario (admin o sí mismo)
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserUpdateDTO userDetails) {
         User authUser = securityService.getAuthenticatedUser();
 
         if (authUser == null) {
@@ -68,21 +70,34 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
         }
 
+        // Actualizamos campos básicos
+        existingUser.setName(userDetails.getName());
+        existingUser.setEmail(userDetails.getEmail());
+        existingUser.setLocation(userDetails.getLocation());
+        existingUser.setBiography(userDetails.getBiography());
+        existingUser.setCredits(userDetails.getCredits());
 
-        // Verificamos si hay cambios reales
-        boolean sameName = existingUser.getName().equals(userDetails.getName());
-        boolean sameLocation = Objects.equals(existingUser.getLocation(), userDetails.getLocation());
-        boolean sameBiography = Objects.equals(existingUser.getBiography(), userDetails.getBiography());
-
-        if (sameName && sameLocation && sameBiography) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("No se detectaron cambios en los datos del usuario.");
+        // Rol si viene en el DTO
+        if (userDetails.getRole() != null) {
+            userService.setUserRole(existingUser, userDetails.getRole());
         }
 
-        // Realizamos la actualización
-        User updatedUser = userService.updateUser(id, userDetails);
-        return ResponseEntity.ok(updatedUser);
+        User updatedUser = userService.saveUser(existingUser);
+
+        // Convertimos a UserDTO para devolverlo
+        UserDTO responseDTO = new UserDTO();
+        responseDTO.setUserId(updatedUser.getUserId());
+        responseDTO.setName(updatedUser.getName());
+        responseDTO.setEmail(updatedUser.getEmail());
+        responseDTO.setLocation(updatedUser.getLocation());
+        responseDTO.setBiography(updatedUser.getBiography());
+        responseDTO.setCredits(updatedUser.getCredits());
+        responseDTO.setRoles(List.of(updatedUser.getRole().getName()));
+
+        return ResponseEntity.ok(responseDTO);
     }
+
+
 
     // Buscar usuarios por nombre
     @GetMapping("/search")
@@ -90,4 +105,38 @@ public class UserController {
         List<User> users = userService.searchUsersByName(name);
         return ResponseEntity.ok(users);
     }
+
+    @GetMapping
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        System.out.println(" getAllUsers() fue llamado");
+
+        User authUser = securityService.getAuthenticatedUser();
+
+        if (authUser == null) {
+            return ResponseEntity.status(401).body(null);
+        }
+
+        System.out.println("Usuario autenticado: " + authUser.getEmail() + " | Rol: " + authUser.getRole().getName());
+
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(authUser.getRole().getName());
+
+        if (!isAdmin) {
+            throw new ForbiddenException("Solo los administradores pueden ver la lista completa de usuarios.");
+        }
+
+        List<UserDTO> userDTOs = userService.getAllUsers().stream().map(user -> {
+            UserDTO dto = new UserDTO();
+            dto.setUserId(user.getUserId());
+            dto.setName(user.getName());
+            dto.setEmail(user.getEmail());
+            dto.setLocation(user.getLocation());
+            dto.setBiography(user.getBiography());
+            dto.setCredits(user.getCredits());
+            dto.setRoles(List.of(user.getRole().getName()));
+            return dto;
+        }).toList();
+
+        return ResponseEntity.ok(userDTOs);
+    }
+
 }

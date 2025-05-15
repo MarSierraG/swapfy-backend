@@ -1,22 +1,28 @@
 package com.swapfy.backend.services;
 
+import com.swapfy.backend.models.Role;
 import com.swapfy.backend.models.User;
+import com.swapfy.backend.repositories.RoleRepository;
 import com.swapfy.backend.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private RoleRepository roleRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
+
 
     public User updateUser(Long userId, User newData) {
         User existingUser = userRepository.findById(userId)
@@ -42,6 +48,20 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
         userRepository.delete(user);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAllWithRolesOrderedByUserId();
+    }
+
+    public void setUserRole(User user, String roleName) {
+        Role role = roleRepository.findByNameIgnoreCase(roleName)
+                .orElseThrow(() -> new IllegalArgumentException("Rol no válido: " + roleName));
+        user.setRole(role);
+    }
+
+    public User saveUser(User user) {
+        return userRepository.save(user);
     }
 
 }

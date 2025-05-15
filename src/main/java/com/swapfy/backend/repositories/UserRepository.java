@@ -4,6 +4,7 @@ import com.swapfy.backend.models.User;
 import com.swapfy.backend.services.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,7 +19,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByNameContainingIgnoreCase(String name);
     Optional<User> findOptionalByEmail(String email);
+    Optional<User> findByEmailIgnoreCase(String email);
 
+    @Query("SELECT u FROM User u JOIN FETCH u.role ORDER BY u.userId ASC")
+    List<User> findAllWithRolesOrderedByUserId();
 
 }
 

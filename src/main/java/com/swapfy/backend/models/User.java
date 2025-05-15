@@ -30,6 +30,7 @@ public class User {
 
     private String location;
     private String biography;
+    private String resetCode;
 
     @Min(value = 0, message = "Los créditos no pueden ser negativos")
     private Integer credits;
