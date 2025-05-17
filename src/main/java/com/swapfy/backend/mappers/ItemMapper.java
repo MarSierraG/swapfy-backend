@@ -5,6 +5,8 @@ import com.swapfy.backend.dto.ItemResponseDTO;
 import com.swapfy.backend.models.Item;
 import com.swapfy.backend.models.Tag;
 import com.swapfy.backend.models.User;
+import com.swapfy.backend.dto.TagDTO;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,9 +40,11 @@ public class ItemMapper {
         dto.setUserName(item.getUser().getName());
         dto.setImageUrl(item.getImageUrl());
         dto.setUserId(item.getUser().getUserId());
-
         dto.setTagNames(item.getTags().stream()
                 .map(Tag::getName)
+                .collect(Collectors.toList()));
+        dto.setTags(item.getTags().stream()
+                .map(tag -> new TagDTO(tag.getTagId(), tag.getName()))
                 .collect(Collectors.toList()));
 
         return dto;

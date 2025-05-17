@@ -1,7 +1,6 @@
 package com.swapfy.backend.dto;
 
 import lombok.Data;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,7 +17,8 @@ public class ItemResponseDTO {
 
     private String userName;
     private List<String> tagNames;
-    private String imageUrl;
+    private List<TagDTO> tags;
 
+    private String imageUrl;
     private Long userId;
 }
