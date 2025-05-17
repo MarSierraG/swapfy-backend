@@ -45,8 +45,16 @@ public class JwtFilter extends OncePerRequestFilter {
                 email = jwtUtil.extractEmail(token);
             } catch (ExpiredJwtException e) {
                 System.out.println("Token expirado");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Token expirado\"}");
+                return;
             } catch (Exception e) {
                 System.out.println("Token inválido");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Token inválido\"}");
+                return;
             }
         }
 
