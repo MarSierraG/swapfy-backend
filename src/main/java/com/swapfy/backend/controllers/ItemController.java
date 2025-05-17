@@ -118,6 +118,10 @@ public class ItemController {
         existingItem.setType(dto.getType());
         existingItem.setTags(tags);
 
+        if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+            existingItem.setImageUrl(dto.getImageUrl());
+        }
+
         // Guardar cambios
         Item updatedItem = itemService.saveItem(existingItem);
 
