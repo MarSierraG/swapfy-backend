@@ -139,4 +139,38 @@ public class UserController {
         return ResponseEntity.ok(userDTOs);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        User authUser = securityService.getAuthenticatedUser();
+
+        if (authUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autenticado");
+        }
+
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(authUser.getRole().getName());
+        boolean isSelf = authUser.getUserId().equals(id);
+
+        if (!isAdmin && !isSelf) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permisos para ver este usuario.");
+        }
+
+        User existingUser = userService.getUserById(id);
+
+        if (existingUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
+        }
+
+        UserDTO responseDTO = new UserDTO();
+        responseDTO.setUserId(existingUser.getUserId());
+        responseDTO.setName(existingUser.getName());
+        responseDTO.setEmail(existingUser.getEmail());
+        responseDTO.setLocation(existingUser.getLocation());
+        responseDTO.setBiography(existingUser.getBiography());
+        responseDTO.setCredits(existingUser.getCredits());
+        responseDTO.setRoles(List.of(existingUser.getRole().getName()));
+
+        return ResponseEntity.ok(responseDTO);
+    }
+
+
 }
