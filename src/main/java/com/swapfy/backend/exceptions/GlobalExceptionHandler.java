@@ -85,6 +85,12 @@ public class GlobalExceptionHandler {
         return handleAllExceptions(ex);
     }
 
+    @ExceptionHandler(TagInUseException.class)
+    public ResponseEntity<ErrorResponse> handleTagInUse(TagInUseException ex) {
+        ErrorResponse error = new ErrorResponse("Etiqueta en uso", ex.getMessage(), "En uso");
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
     // Genérico (500)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {

@@ -1,6 +1,7 @@
 package com.swapfy.backend.controllers;
 
 import com.swapfy.backend.dto.TagDTO;
+import com.swapfy.backend.exceptions.TagInUseException;
 import com.swapfy.backend.models.Tag;
 import com.swapfy.backend.services.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +50,24 @@ public class TagController {
     // Actualizar una etiqueta (solo para ADMIN)
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Tag> updateTag(@PathVariable Long id, @RequestBody Tag tagDetails) {
-        Tag updatedTag = tagService.updateTag(id, tagDetails);
-        return ResponseEntity.ok(updatedTag);
+    public ResponseEntity<?> updateTag(
+            @PathVariable Long id,
+            @RequestBody Tag tagDetails,
+            @RequestParam(defaultValue = "false") boolean force
+    ) {
+        Tag tag = tagService.getTagById(id)
+                .orElseThrow(() -> new RuntimeException("Etiqueta no encontrada"));
+
+        // Si la etiqueta está en uso y no se ha forzado la edición
+        if (!force && tag.getItems() != null && !tag.getItems().isEmpty()) {
+            throw new TagInUseException("Esta etiqueta está siendo usada por uno o más artículos.");
+        }
+
+        tag.setName(tagDetails.getName());
+        Tag updatedTag = tagService.updateTag(id, tag, force);
+        return ResponseEntity.ok(new TagDTO(updatedTag.getTagId(), updatedTag.getName()));
     }
+
 
     // Eliminar una etiqueta (solo para ADMIN)
     @DeleteMapping("/{id}")

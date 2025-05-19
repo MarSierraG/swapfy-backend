@@ -1,5 +1,6 @@
 package com.swapfy.backend.services;
 
+import com.swapfy.backend.exceptions.TagInUseException;
 import com.swapfy.backend.models.Tag;
 import com.swapfy.backend.repositories.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +36,14 @@ public class TagService {
     }
 
     // Actualizar una etiqueta existente
-    public Tag updateTag(Long id, Tag tagDetails) {
+    public Tag updateTag(Long id, Tag tagDetails, boolean force) {
         Tag tag = tagRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Etiqueta no encontrada"));
+
+        if (!force && !tag.getItems().isEmpty()) {
+            throw new TagInUseException("Esta etiqueta está siendo usada en uno o más artículos.");
+        }
+
         tag.setName(tagDetails.getName());
         return tagRepository.save(tag);
     }
