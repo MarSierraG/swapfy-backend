@@ -44,6 +44,7 @@ public class SecurityConfig {
 
                         // Endpoints públicos
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/check-email").permitAll()
 
                         // Transacciones: solo admin
                         .requestMatchers(HttpMethod.POST, "/api/transactions/**").hasRole("ADMIN")

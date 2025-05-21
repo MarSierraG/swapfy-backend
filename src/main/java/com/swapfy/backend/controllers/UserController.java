@@ -98,6 +98,13 @@ public class UserController {
     }
 
 
+    @GetMapping("/check-email")
+    public ResponseEntity<Boolean> checkEmailExists(@RequestParam String email,
+                                                    @RequestParam(required = false) Long excludeId) {
+        boolean exists = userService.emailExistsForOtherUser(email, excludeId);
+        return ResponseEntity.ok(exists);
+    }
+
 
     // Buscar usuarios por nombre
     @GetMapping("/search")

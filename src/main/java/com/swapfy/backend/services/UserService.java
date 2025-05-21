@@ -60,6 +60,11 @@ public class UserService {
         user.setRole(role);
     }
 
+    public boolean emailExistsForOtherUser(String email, Long excludeId) {
+        Optional<User> userWithEmail = userRepository.findByEmail(email);
+        return userWithEmail.isPresent() && !userWithEmail.get().getUserId().equals(excludeId);
+    }
+
     public User saveUser(User user) {
         return userRepository.save(user);
     }
