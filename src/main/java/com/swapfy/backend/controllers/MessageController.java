@@ -1,10 +1,12 @@
 package com.swapfy.backend.controllers;
 
+import com.swapfy.backend.dto.MessageRequestDTO;
+import com.swapfy.backend.dto.MessageResponseDTO;
 import com.swapfy.backend.models.Message;
 import com.swapfy.backend.services.MessageService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -34,33 +36,67 @@ public class MessageController {
     }
 
     @PostMapping
-    public ResponseEntity<?> sendMessage(@Valid @RequestBody Message message, BindingResult result) {
-        if (message.getContent() == null || message.getContent().trim().isEmpty()) {
+    public ResponseEntity<?> sendMessage(@Valid @RequestBody MessageRequestDTO dto) {
+        if (dto.content() == null || dto.content().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("El contenido del mensaje no puede estar vacío");
         }
-        if (result.hasErrors()) {
-            System.out.println("Errores de validación: " + result.getAllErrors());
-            return ResponseEntity.badRequest().body(result.getAllErrors());
-        }
-        Message savedMessage = messageService.sendMessage(message);
-        return ResponseEntity.ok(savedMessage);
+
+        Message saved = messageService.sendMessage(
+                dto.senderUserId(),
+                dto.receiverUserId(),
+                dto.content()
+        );
+
+        MessageResponseDTO response = new MessageResponseDTO(
+                saved.getMessageId(),
+                saved.getSender().getUserId(),
+                saved.getReceiver().getUserId(),
+                saved.getContent(),
+                saved.getSentAt()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
-
-
-
     @GetMapping("/sender/{senderId}")
-    public List<Message> getMessagesBySender(@PathVariable Long senderId) {
-        return messageService.getMessagesBySender(senderId);
+    public List<MessageResponseDTO> getMessagesBySender(@PathVariable Long senderId) {
+        return messageService.getMessagesBySender(senderId)
+                .stream()
+                .map(msg -> new MessageResponseDTO(
+                        msg.getMessageId(),
+                        msg.getSender().getUserId(),
+                        msg.getReceiver().getUserId(),
+                        msg.getContent(),
+                        msg.getSentAt()
+                ))
+                .toList();
     }
 
     @GetMapping("/receiver/{receiverId}")
-    public List<Message> getMessagesByReceiver(@PathVariable Long receiverId) {
-        return messageService.getMessagesByReceiver(receiverId);
+    public List<MessageResponseDTO> getMessagesByReceiver(@PathVariable Long receiverId) {
+        return messageService.getMessagesByReceiver(receiverId)
+                .stream()
+                .map(msg -> new MessageResponseDTO(
+                        msg.getMessageId(),
+                        msg.getSender().getUserId(),
+                        msg.getReceiver().getUserId(),
+                        msg.getContent(),
+                        msg.getSentAt()
+                ))
+                .toList();
     }
 
     @GetMapping("/conversation")
-    public List<Message> getConversation(@RequestParam Long user1, @RequestParam Long user2) {
-        return messageService.getConversation(user1, user2);
+    public List<MessageResponseDTO> getConversation(@RequestParam Long user1, @RequestParam Long user2) {
+        return messageService.getConversation(user1, user2)
+                .stream()
+                .map(msg -> new MessageResponseDTO(
+                        msg.getMessageId(),
+                        msg.getSender().getUserId(),
+                        msg.getReceiver().getUserId(),
+                        msg.getContent(),
+                        msg.getSentAt()
+                ))
+                .toList();
     }
 }
