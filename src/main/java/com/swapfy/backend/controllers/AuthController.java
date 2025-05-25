@@ -63,6 +63,7 @@ public class AuthController {
         userDTO.setLocation(validUser.getLocation());
         userDTO.setBiography(validUser.getBiography());
         userDTO.setCredits(validUser.getCredits());
+        userDTO.setRegistrationDate(validUser.getRegistrationDate());
 
         List<String> roleNames = List.of(validUser.getRole().getName());
         userDTO.setRoles(roleNames);

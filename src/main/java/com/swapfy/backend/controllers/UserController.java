@@ -136,6 +136,7 @@ public class UserController {
             dto.setBiography(user.getBiography());
             dto.setCredits(user.getCredits());
             dto.setRoles(List.of(user.getRole().getName()));
+            dto.setRegistrationDate(user.getRegistrationDate());
             return dto;
         }).toList();
 
