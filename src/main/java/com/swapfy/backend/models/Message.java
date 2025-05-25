@@ -34,4 +34,7 @@ public class Message {
     protected void onCreate() {
         this.sentAt = LocalDateTime.now();
     }
+
+    @Column(name = "is_read")
+    private boolean isRead = false;
 }

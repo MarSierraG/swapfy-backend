@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -39,6 +40,10 @@ public class MessageController {
     public ResponseEntity<?> sendMessage(@Valid @RequestBody MessageRequestDTO dto) {
         if (dto.content() == null || dto.content().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("El contenido del mensaje no puede estar vacío");
+        }
+
+        if (dto.senderUserId().equals(dto.receiverUserId())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No puedes enviarte mensajes a ti mism@."));
         }
 
         Message saved = messageService.sendMessage(
@@ -99,4 +104,20 @@ public class MessageController {
                 ))
                 .toList();
     }
+
+    @PutMapping("/mark-as-read")
+    public ResponseEntity<Map<String, String>> markMessagesAsRead(@RequestParam Long senderId, @RequestParam Long receiverId) {
+        messageService.markMessagesAsRead(senderId, receiverId);
+        return ResponseEntity.ok(Map.of("message", "Mensajes marcados como leídos."));
+    }
+
+
+    @GetMapping("/unread-summary/{receiverId}")
+    public ResponseEntity<Map<Long, Long>> getUnreadSummary(@PathVariable Long receiverId) {
+        Map<Long, Long> summary = messageService.getUnreadMessageSummary(receiverId);
+        return ResponseEntity.ok(summary);
+    }
+
+
+
 }

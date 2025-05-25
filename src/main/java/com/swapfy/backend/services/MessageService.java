@@ -2,13 +2,16 @@ package com.swapfy.backend.services;
 
 import com.swapfy.backend.models.Message;
 import com.swapfy.backend.models.User;
+import com.swapfy.backend.projections.UnreadCountProjection;
 import com.swapfy.backend.repositories.MessageRepository;
 import com.swapfy.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -59,7 +62,31 @@ public class MessageService {
         message.setReceiver(receiver);
         message.setContent(content);
 
+        if (senderId.equals(receiverId)) {
+            throw new IllegalArgumentException("No puedes enviarte mensajes a ti mism@.");
+        }
+
         return messageRepository.save(message);
     }
+
+    public void markMessagesAsRead(Long senderId, Long receiverId) {
+        List<Message> unreadMessages = messageRepository.findBySenderUserIdAndReceiverUserIdAndIsReadFalse(senderId, receiverId);
+        for (Message message : unreadMessages) {
+            message.setRead(true);
+        }
+        messageRepository.saveAll(unreadMessages);
+    }
+
+    public Map<Long, Long> getUnreadMessageSummary(Long receiverId) {
+        List<UnreadCountProjection> results = messageRepository.countUnreadMessagesGroupedBySender(receiverId);
+        Map<Long, Long> summary = new HashMap<>();
+
+        for (UnreadCountProjection row : results) {
+            summary.put(row.getSenderId(), row.getCount());
+        }
+
+        return summary;
+    }
+
 
 }

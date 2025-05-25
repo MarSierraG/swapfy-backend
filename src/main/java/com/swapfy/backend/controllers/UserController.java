@@ -127,10 +127,6 @@ public class UserController {
 
         boolean isAdmin = "ADMIN".equalsIgnoreCase(authUser.getRole().getName());
 
-        if (!isAdmin) {
-            throw new ForbiddenException("Solo los administradores pueden ver la lista completa de usuarios.");
-        }
-
         List<UserDTO> userDTOs = userService.getAllUsers().stream().map(user -> {
             UserDTO dto = new UserDTO();
             dto.setUserId(user.getUserId());
@@ -154,15 +150,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autenticado");
         }
 
-        boolean isAdmin = "ADMIN".equalsIgnoreCase(authUser.getRole().getName());
-        boolean isSelf = authUser.getUserId().equals(id);
-
-        if (!isAdmin && !isSelf) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permisos para ver este usuario.");
-        }
-
         User existingUser = userService.getUserById(id);
-
         if (existingUser == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
         }
