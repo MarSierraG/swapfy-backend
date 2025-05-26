@@ -32,4 +32,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             "GROUP BY m.sender.userId")
     List<UnreadCountProjection> countUnreadMessagesGroupedBySender(@Param("receiverId") Long receiverId);
 
+    List<Message> findBySenderUserId(Long userId);
+    List<Message> findByReceiverUserId(Long userId);
+
 }

@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class MessageService {
@@ -88,5 +85,25 @@ public class MessageService {
         return summary;
     }
 
+
+    public int countUniqueConversationUsers(Long userId) {
+        Set<Long> uniqueUserIds = new HashSet<>();
+
+        List<Message> sent = messageRepository.findBySenderUserId(userId);
+        List<Message> received = messageRepository.findByReceiverUserId(userId);
+
+        for (Message msg : sent) {
+            uniqueUserIds.add(msg.getReceiver().getUserId());
+        }
+
+        for (Message msg : received) {
+            uniqueUserIds.add(msg.getSender().getUserId());
+        }
+
+        // Opcional: eliminarse a sí mismo si está en la lista
+        uniqueUserIds.remove(userId);
+
+        return uniqueUserIds.size();
+    }
 
 }

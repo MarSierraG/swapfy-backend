@@ -1,7 +1,7 @@
 package com.swapfy.backend.controllers;
 
 import com.swapfy.backend.dto.UserDTO;
-import com.swapfy.backend.dto.UserUpdateDTO;
+import com.swapfy.backend.dto.AdminUserUpdateDTO;
 import com.swapfy.backend.exceptions.ForbiddenException;
 import com.swapfy.backend.models.User;
 import com.swapfy.backend.services.SecurityService;
@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -50,7 +48,7 @@ public class UserController {
 
     // Actualizar usuario (admin o sí mismo)
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserUpdateDTO userDetails) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody AdminUserUpdateDTO userDetails) {
         User authUser = securityService.getAuthenticatedUser();
 
         if (authUser == null) {
@@ -70,21 +68,22 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
         }
 
-        // Actualizamos campos básicos
         existingUser.setName(userDetails.getName());
         existingUser.setEmail(userDetails.getEmail());
         existingUser.setLocation(userDetails.getLocation());
         existingUser.setBiography(userDetails.getBiography());
-        existingUser.setCredits(userDetails.getCredits());
 
-        // Rol si viene en el DTO
-        if (userDetails.getRole() != null) {
+        if (isAdmin && userDetails.getCredits() != null) {
+            existingUser.setCredits(userDetails.getCredits());
+        }
+
+        if (isAdmin && userDetails.getRole() != null) {
             userService.setUserRole(existingUser, userDetails.getRole());
         }
 
         User updatedUser = userService.saveUser(existingUser);
 
-        // Convertimos a UserDTO para devolverlo
+
         UserDTO responseDTO = new UserDTO();
         responseDTO.setUserId(updatedUser.getUserId());
         responseDTO.setName(updatedUser.getName());
@@ -93,6 +92,7 @@ public class UserController {
         responseDTO.setBiography(updatedUser.getBiography());
         responseDTO.setCredits(updatedUser.getCredits());
         responseDTO.setRoles(List.of(updatedUser.getRole().getName()));
+        responseDTO.setRegistrationDate(updatedUser.getRegistrationDate());
 
         return ResponseEntity.ok(responseDTO);
     }

@@ -118,6 +118,10 @@ public class MessageController {
         return ResponseEntity.ok(summary);
     }
 
-
+    @GetMapping("/unique-users/{userId}")
+    public ResponseEntity<Integer> getUniqueConversations(@PathVariable Long userId) {
+        int count = messageService.countUniqueConversationUsers(userId);
+        return ResponseEntity.ok(count);
+    }
 
 }
