@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -151,6 +153,31 @@ public class MessageController {
         messageService.deleteConversation(user1, user2);
         return ResponseEntity.ok(Map.of("message", "Conversación eliminada correctamente"));
     }
+
+
+    @GetMapping("/visible-conversations")
+    public ResponseEntity<List<Map<String, Object>>> getVisibleConversationUsers() {
+        User authUser = securityService.getAuthenticatedUser();
+
+        if (authUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        List<User> users = messageService.getVisibleConversationUsers(authUser.getUserId());
+
+        List<Map<String, Object>> response = users.stream().map(u -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("userId", u.getUserId());
+            map.put("name", u.getName());
+            map.put("email", u.getEmail());
+            return map;
+        }).toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
 
 
 

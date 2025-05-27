@@ -3,8 +3,10 @@ package com.swapfy.backend.services;
 import com.swapfy.backend.models.Message;
 import com.swapfy.backend.models.User;
 import com.swapfy.backend.projections.UnreadCountProjection;
+import com.swapfy.backend.repositories.HiddenConversationRepository;
 import com.swapfy.backend.repositories.MessageRepository;
 import com.swapfy.backend.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,9 @@ import java.util.*;
 public class MessageService {
 
     private final MessageRepository messageRepository;
+
+    @Autowired
+    private HiddenConversationRepository hiddenConversationRepository;
 
     @Autowired
     public MessageService(MessageRepository messageRepository) {
@@ -50,21 +55,28 @@ public class MessageService {
     @Autowired
     private UserRepository userRepository;
 
+    @Transactional
     public Message sendMessage(Long senderId, Long receiverId, String content) {
         User sender = userRepository.findById(senderId).orElseThrow();
         User receiver = userRepository.findById(receiverId).orElseThrow();
+
+        if (senderId.equals(receiverId)) {
+            throw new IllegalArgumentException("No puedes enviarte mensajes a ti mism@.");
+        }
 
         Message message = new Message();
         message.setSender(sender);
         message.setReceiver(receiver);
         message.setContent(content);
 
-        if (senderId.equals(receiverId)) {
-            throw new IllegalArgumentException("No puedes enviarte mensajes a ti mism@.");
-        }
+        Message saved = messageRepository.save(message);
 
-        return messageRepository.save(message);
+        hiddenConversationRepository.deleteByUserAndOtherUser(sender, receiver);
+        hiddenConversationRepository.deleteByUserAndOtherUser(receiver, sender);
+
+        return saved;
     }
+
 
     public void markMessagesAsRead(Long senderId, Long receiverId) {
         List<Message> unreadMessages = messageRepository.findBySenderUserIdAndReceiverUserIdAndIsReadFalse(senderId, receiverId);
@@ -106,12 +118,46 @@ public class MessageService {
         return uniqueUserIds.size();
     }
 
+    public List<User> getVisibleConversationUsers(Long userId) {
+        Set<Long> otherUserIds = new HashSet<>();
+
+        List<Message> sent = messageRepository.findBySenderUserId(userId);
+        List<Message> received = messageRepository.findByReceiverUserId(userId);
+
+        for (Message msg : sent) {
+            Long otherId = msg.getReceiver().getUserId();
+            if (!hiddenConversationRepository.existsByUser_UserIdAndOtherUser_UserId(userId, otherId)) {
+
+                otherUserIds.add(otherId);
+            }
+        }
+
+        for (Message msg : received) {
+            Long otherId = msg.getSender().getUserId();
+            if (!hiddenConversationRepository.existsByUser_UserIdAndOtherUser_UserId(userId, otherId)) {
+                otherUserIds.add(otherId);
+            }
+        }
+
+        // Eliminarse a sí mismo por seguridad
+        otherUserIds.remove(userId);
+
+        // Convertir a lista de User
+        return otherUserIds.stream()
+                .map(id -> userRepository.findById(id).orElse(null))
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+
     public void deleteConversation(Long user1, Long user2) {
         List<Message> messages = messageRepository.findBySender_UserIdAndReceiver_UserIdOrReceiver_UserIdAndSender_UserId(
                 user1, user2, user1, user2
         );
         messageRepository.deleteAll(messages);
     }
+
+
 
 
 }
