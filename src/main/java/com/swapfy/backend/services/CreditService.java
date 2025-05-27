@@ -4,6 +4,7 @@ import com.lowagie.text.*;
 import com.lowagie.text.Font;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import com.swapfy.backend.dto.CreditResponseDTO;
 import com.swapfy.backend.models.Credit;
 import com.swapfy.backend.models.User;
 import com.swapfy.backend.repositories.CreditRepository;
@@ -16,6 +17,7 @@ import com.lowagie.text.Document;
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -99,6 +101,55 @@ public class CreditService {
 
         document.add(table);
         document.close();
+    }
+
+    public List<Credit> getAllCredits() {
+        return creditRepository.findAll();
+    }
+
+    public void updateCredit(Long creditId, int amount, String type) {
+        Optional<Credit> optionalCredit = creditRepository.findById(creditId);
+        if (optionalCredit.isEmpty()) {
+            throw new RuntimeException("Crédito no encontrado con ID: " + creditId);
+        }
+
+        Credit credit = optionalCredit.get();
+        credit.setAmount(amount);
+        credit.setType(type);
+        creditRepository.save(credit);
+    }
+
+
+    public void deleteCredit(Long creditId) {
+        Optional<Credit> optionalCredit = creditRepository.findById(creditId);
+
+        if (optionalCredit.isEmpty()) {
+            throw new RuntimeException("Crédito no encontrado con ID: " + creditId);
+        }
+
+        Credit credit = optionalCredit.get();
+        User user = credit.getUser();
+
+        // Revertir el efecto del crédito en el usuario
+        int revertedAmount = -credit.getAmount(); // si era -1, ahora +1
+        user.setCredits(user.getCredits() + revertedAmount);
+
+        userRepository.save(user); // guardar nuevo total
+        creditRepository.deleteById(creditId);
+    }
+
+    public List<CreditResponseDTO> getAllCreditsAsDTOs() {
+        List<Credit> credits = creditRepository.findAll();
+
+        return credits.stream().map(credit -> CreditResponseDTO.builder()
+                .creditId(credit.getCreditId())
+                .amount(credit.getAmount())
+                .type(credit.getType())
+                .createdAt(credit.getCreatedAt())
+                .userId(credit.getUser().getUserId())
+                .userName(credit.getUser().getName())
+                .build()
+        ).toList();
     }
 
 

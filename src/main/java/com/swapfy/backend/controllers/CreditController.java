@@ -1,6 +1,7 @@
 package com.swapfy.backend.controllers;
 
 import com.swapfy.backend.dto.CreditDTO;
+import com.swapfy.backend.dto.CreditResponseDTO;
 import com.swapfy.backend.models.Credit;
 import com.swapfy.backend.services.CreditService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +20,12 @@ public class CreditController {
 
     @Autowired
     private CreditService creditService;
+
+    @GetMapping("")
+    public List<CreditResponseDTO> getAllCredits() {
+        return creditService.getAllCreditsAsDTOs();
+    }
+
 
     @GetMapping("/user/{userId}")
     public List<Credit> getCreditsByUser(@PathVariable Long userId) {
@@ -50,5 +57,22 @@ public class CreditController {
         response.setHeader("Content-Disposition", "attachment; filename=extracto_creditos_swapfy.pdf");
         creditService.exportCreditExtract(userId, response); // ✅ llamado al método ya existente
     }
+
+    @PutMapping("/{creditId}")
+    public ResponseEntity<?> updateCredit(@PathVariable Long creditId, @RequestBody CreditDTO dto) {
+        creditService.updateCredit(creditId, dto.getAmount(), dto.getType());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{creditId}")
+    public ResponseEntity<?> deleteCredit(@PathVariable Long creditId) {
+        creditService.deleteCredit(creditId);
+        return ResponseEntity.ok().build();
+    }
+
+
+
+
+
 
 }

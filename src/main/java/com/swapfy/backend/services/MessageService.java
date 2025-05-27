@@ -106,4 +106,12 @@ public class MessageService {
         return uniqueUserIds.size();
     }
 
+    public void deleteConversation(Long user1, Long user2) {
+        List<Message> messages = messageRepository.findBySender_UserIdAndReceiver_UserIdOrReceiver_UserIdAndSender_UserId(
+                user1, user2, user1, user2
+        );
+        messageRepository.deleteAll(messages);
+    }
+
+
 }

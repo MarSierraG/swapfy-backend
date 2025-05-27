@@ -3,8 +3,10 @@ package com.swapfy.backend.controllers;
 import com.swapfy.backend.dto.MessageRequestDTO;
 import com.swapfy.backend.dto.MessageResponseDTO;
 import com.swapfy.backend.models.Message;
+import com.swapfy.backend.models.User;
 import com.swapfy.backend.services.MessageService;
 
+import com.swapfy.backend.services.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,10 @@ import java.util.Optional;
 public class MessageController {
 
     private final MessageService messageService;
+
+    @Autowired
+    private SecurityService securityService;
+
 
     @Autowired
     public MessageController(MessageService messageService) {
@@ -123,5 +129,29 @@ public class MessageController {
         int count = messageService.countUniqueConversationUsers(userId);
         return ResponseEntity.ok(count);
     }
+
+    @DeleteMapping("/conversation")
+    public ResponseEntity<?> deleteConversation(
+            @RequestParam Long user1,
+            @RequestParam Long user2
+    ) {
+        User authUser = securityService.getAuthenticatedUser();
+
+        if (authUser == null) {
+            return ResponseEntity.status(401).body("No autenticado");
+        }
+
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(authUser.getRole().getName());
+        boolean isParticipant = authUser.getUserId().equals(user1) || authUser.getUserId().equals(user2);
+
+        if (!isAdmin && !isParticipant) {
+            return ResponseEntity.status(403).body(Map.of("error", "No tienes permiso para borrar esta conversación"));
+        }
+
+        messageService.deleteConversation(user1, user2);
+        return ResponseEntity.ok(Map.of("message", "Conversación eliminada correctamente"));
+    }
+
+
 
 }
