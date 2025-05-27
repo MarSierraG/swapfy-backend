@@ -1,9 +1,11 @@
 package com.swapfy.backend.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 
 @Entity
 @Table(name = "messages")
@@ -27,12 +29,13 @@ public class Message {
     @Column(nullable = false, length = 500)
     private String content;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     @Column(name = "timestamp", nullable = false, updatable = false)
-    private LocalDateTime sentAt;
+    private Instant sentAt;
 
     @PrePersist
     protected void onCreate() {
-        this.sentAt = LocalDateTime.now();
+        this.sentAt = Instant.now(); // Hora UTC actual
     }
 
     @Column(name = "is_read")

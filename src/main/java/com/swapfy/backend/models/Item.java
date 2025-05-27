@@ -5,7 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Entity
@@ -51,11 +51,11 @@ public class Item {
     private String status = "Available";  // Usar 'status' en lugar de 'available'
 
     @Column(name = "publication_date", nullable = false, updatable = false)
-    private LocalDateTime publicationDate;  // Usar publication_date en lugar de created_at
+    private Instant publicationDate;  // Cambiado a Instant
 
     @PrePersist
     protected void onCreate() {
-        this.publicationDate = LocalDateTime.now();  // Asignamos la fecha a publicationDate
+        this.publicationDate = Instant.now();  // Hora UTC actual
     }
 
     @Column(name = "image_url")

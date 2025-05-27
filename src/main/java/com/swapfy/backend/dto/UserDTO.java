@@ -1,8 +1,7 @@
 package com.swapfy.backend.dto;
 
 import lombok.Data;
-
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -14,5 +13,5 @@ public class UserDTO {
     private String biography;
     private Integer credits;
     private List<String> roles;
-    private LocalDateTime registrationDate;
+    private Instant registrationDate;
 }

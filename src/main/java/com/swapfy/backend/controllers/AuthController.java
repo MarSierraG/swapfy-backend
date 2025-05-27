@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +64,7 @@ public class AuthController {
         userDTO.setLocation(validUser.getLocation());
         userDTO.setBiography(validUser.getBiography());
         userDTO.setCredits(validUser.getCredits());
-        userDTO.setRegistrationDate(validUser.getRegistrationDate());
+        userDTO.setRegistrationDate(Instant.from(validUser.getRegistrationDate()));
 
         List<String> roleNames = List.of(validUser.getRole().getName());
         userDTO.setRoles(roleNames);

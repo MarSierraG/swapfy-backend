@@ -2,7 +2,8 @@ package com.swapfy.backend.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 
 @Entity
 @Table(name = "ratings")
@@ -29,10 +30,10 @@ public class Rating {
     private String comment;
 
     @Column(name = "date", nullable = false, updatable = false)
-    private LocalDateTime ratedAt;
+    private Instant ratedAt;
 
     @PrePersist
     protected void onCreate() {
-        this.ratedAt = LocalDateTime.now();
+        this.ratedAt = Instant.now();
     }
 }

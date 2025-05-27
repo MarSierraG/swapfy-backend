@@ -1,7 +1,7 @@
 package com.swapfy.backend.dto;
 
 import lombok.Data;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -13,7 +13,7 @@ public class ItemResponseDTO {
     private Integer creditValue;
     private String status;
     private String type;
-    private LocalDateTime publicationDate;
+    private Instant publicationDate;
 
     private String userName;
     private List<String> tagNames;

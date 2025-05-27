@@ -3,7 +3,7 @@ package com.swapfy.backend.models;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "transactions")
@@ -38,10 +38,10 @@ public class Transaction {
     private String status; // 'Completed' o 'Cancelled'
 
     @Column(name = "transaction_date", nullable = false, updatable = false)
-    private LocalDateTime transactionDate;
+    private Instant transactionDate;
 
     // Constructor vacío (necesario para JPA)
     public Transaction() {
-        this.transactionDate = LocalDateTime.now(); // Fecha de transacción automática
+        this.transactionDate = Instant.now(); // Fecha de transacción automática
     }
 }

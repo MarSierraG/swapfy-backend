@@ -9,7 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.validation.Valid;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -55,7 +56,8 @@ public class AuthService {
         // Setear contraseña, créditos y fecha de registro
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setCredits(100); // inicializar créditos
-        user.setRegistrationDate(LocalDateTime.now()); // registrar fecha actual
+        user.setRegistrationDate(Instant.now());
+
 
         // Asignar rol USER por defecto
         Role userRole = roleRepository.findByName("USER")

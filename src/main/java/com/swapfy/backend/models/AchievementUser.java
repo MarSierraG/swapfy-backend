@@ -2,7 +2,7 @@ package com.swapfy.backend.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "achievements_users")
@@ -23,10 +23,10 @@ public class AchievementUser {
     private Achievement achievement;
 
     @Column(name = "date_achieved", nullable = false)
-    private LocalDateTime unlockedAt;
+    private Instant unlockedAt;
 
     @PrePersist
     protected void onCreate() {
-        this.unlockedAt = LocalDateTime.now();
+        this.unlockedAt = Instant.now();
     }
 }

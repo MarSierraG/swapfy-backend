@@ -1,8 +1,7 @@
 package com.swapfy.backend.dto;
 
 import lombok.*;
-
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -13,7 +12,7 @@ public class CreditResponseDTO {
     private Long creditId;
     private int amount;
     private String type;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
     private Long userId;
     private String userName;
 }

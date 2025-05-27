@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import com.lowagie.text.Document;
 import java.awt.*;
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,7 +84,12 @@ public class CreditService {
         document.add(title);
         document.add(new Paragraph("Usuario: " + user.getName()));
         document.add(new Paragraph("Email: " + user.getEmail()));
-        document.add(new Paragraph("Fecha: " + java.time.LocalDate.now()));
+
+        // Fecha actual en Madrid
+        ZoneId madridZone = ZoneId.of("Europe/Madrid");
+        String fechaActual = ZonedDateTime.now(madridZone).format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        document.add(new Paragraph("Fecha: " + fechaActual));
+
         document.add(Chunk.NEWLINE);
 
         PdfPTable table = new PdfPTable(3);
@@ -96,13 +104,16 @@ public class CreditService {
         for (Credit credit : credits) {
             table.addCell(credit.getType());
             table.addCell(String.valueOf(credit.getAmount()));
-            table.addCell(String.valueOf(credit.getCreatedAt()));
+
+            // Convertir createdAt a zona Madrid y formatear
+            ZonedDateTime fechaCredito = credit.getCreatedAt().atZone(madridZone);
+            String fechaFormateada = fechaCredito.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+            table.addCell(fechaFormateada);
         }
 
         document.add(table);
         document.close();
     }
-
     public List<Credit> getAllCredits() {
         return creditRepository.findAll();
     }

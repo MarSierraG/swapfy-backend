@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Entity
@@ -35,7 +35,8 @@ public class User {
     @Min(value = 0, message = "Los créditos no pueden ser negativos")
     private Integer credits;
 
-    private LocalDateTime registrationDate;
+    @Column(name = "registration_date", nullable = false, updatable = false)
+    private Instant registrationDate;
 
     @ManyToOne
     @JoinColumn(name = "role_id")
@@ -47,6 +48,6 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
-        this.registrationDate = LocalDateTime.now();
+        this.registrationDate = Instant.now();
     }
 }
