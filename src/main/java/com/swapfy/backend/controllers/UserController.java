@@ -168,5 +168,26 @@ public class UserController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
+        User user = userService.findByEmail(email);
+        if (user == null) return ResponseEntity.notFound().build();
+
+        // Crear manualmente el DTO
+        UserDTO dto = new UserDTO();
+        dto.setUserId(user.getUserId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setLocation(user.getLocation());
+        dto.setBiography(user.getBiography());
+        dto.setCredits(user.getCredits());
+        dto.setRegistrationDate(user.getRegistrationDate());
+        dto.setRoles(List.of());
+
+        return ResponseEntity.ok(dto);
+    }
+
+
+
 
 }

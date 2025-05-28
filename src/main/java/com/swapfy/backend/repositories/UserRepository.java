@@ -24,6 +24,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u JOIN FETCH u.role ORDER BY u.userId ASC")
     List<User> findAllWithRolesOrderedByUserId();
 
+
+
     boolean existsByEmailIgnoreCaseAndUserIdNot(String email, Long userId);
 }
 

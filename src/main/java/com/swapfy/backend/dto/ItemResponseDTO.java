@@ -21,4 +21,5 @@ public class ItemResponseDTO {
 
     private String imageUrl;
     private Long userId;
+    private String userEmail;
 }

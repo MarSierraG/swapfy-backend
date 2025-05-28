@@ -34,6 +34,7 @@ public class ItemMapper {
         dto.setTitle(item.getTitle());
         dto.setDescription(item.getDescription());
         dto.setCreditValue(item.getCreditValue());
+        dto.setUserEmail(item.getUser().getEmail());
         dto.setStatus(item.getStatus());
         dto.setType(item.getType());
         dto.setPublicationDate(item.getPublicationDate());
