@@ -157,6 +157,28 @@ public class MessageService {
     }
 
 
+    public List<User> getAllConversationUsers(Long userId) {
+        Set<Long> otherUserIds = new HashSet<>();
+
+        List<Message> sent = messageRepository.findBySenderUserId(userId);
+        List<Message> received = messageRepository.findByReceiverUserId(userId);
+
+        for (Message msg : sent) {
+            otherUserIds.add(msg.getReceiver().getUserId());
+        }
+
+        for (Message msg : received) {
+            otherUserIds.add(msg.getSender().getUserId());
+        }
+
+        otherUserIds.remove(userId); // por si acaso
+
+        return otherUserIds.stream()
+                .map(id -> userRepository.findById(id).orElse(null))
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
 
 
 }

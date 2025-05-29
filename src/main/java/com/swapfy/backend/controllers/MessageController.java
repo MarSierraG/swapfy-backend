@@ -176,9 +176,27 @@ public class MessageController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/admin/visible-conversations/{userId}")
+    public ResponseEntity<List<Map<String, Object>>> getVisibleConversationUsersAsAdmin(@PathVariable Long userId) {
+        User authUser = securityService.getAuthenticatedUser();
+
+        if (authUser == null || !"ADMIN".equalsIgnoreCase(authUser.getRole().getName())) {
+            return ResponseEntity.status(403).body(null);
+        }
+
+        List<User> users = messageService.getAllConversationUsers(userId);
 
 
+        List<Map<String, Object>> response = users.stream().map(u -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("userId", u.getUserId());
+            map.put("name", u.getName());
+            map.put("email", u.getEmail());
+            return map;
+        }).toList();
 
+        return ResponseEntity.ok(response);
+    }
 
 
 }
