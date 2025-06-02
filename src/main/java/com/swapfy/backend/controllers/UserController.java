@@ -173,7 +173,7 @@ public class UserController {
         User user = userService.findByEmail(email);
         if (user == null) return ResponseEntity.notFound().build();
 
-        // Crear manualmente el DTO
+        // Crear el DTO
         UserDTO dto = new UserDTO();
         dto.setUserId(user.getUserId());
         dto.setName(user.getName());
@@ -186,8 +186,5 @@ public class UserController {
 
         return ResponseEntity.ok(dto);
     }
-
-
-
 
 }

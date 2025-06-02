@@ -2,6 +2,7 @@ package com.swapfy.backend.services;
 
 import com.lowagie.text.*;
 import com.lowagie.text.Font;
+import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.swapfy.backend.dto.CreditResponseDTO;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.lowagie.text.Document;
 import java.awt.*;
+import com.lowagie.text.Image;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -70,9 +72,17 @@ public class CreditService {
         List<Credit> credits = creditRepository.findByUser_UserIdOrderByCreatedAtDesc(userId);
 
         Document document = new Document(PageSize.A4);
-        PdfWriter.getInstance(document, response.getOutputStream());
+        PdfWriter writer = PdfWriter.getInstance(document, response.getOutputStream());
 
         document.open();
+
+        // Añadir marca de agua
+        Image watermark = Image.getInstance("src/main/resources/static/swapfy-watermark-transparent.png");
+        watermark.setAbsolutePosition(document.right() - 70, document.top() - 70);
+        watermark.scaleToFit(70, 70); // tamaño
+
+        PdfContentByte canvas = writer.getDirectContentUnder(); // fondo
+        canvas.addImage(watermark);
 
         Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
         titleFont.setSize(18);
@@ -105,7 +115,7 @@ public class CreditService {
             table.addCell(credit.getType());
             table.addCell(String.valueOf(credit.getAmount()));
 
-            // Convertir createdAt a zona Madrid y formatear
+            // Zona Madrid y formatear
             ZonedDateTime fechaCredito = credit.getCreatedAt().atZone(madridZone);
             String fechaFormateada = fechaCredito.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
             table.addCell(fechaFormateada);
@@ -114,6 +124,8 @@ public class CreditService {
         document.add(table);
         document.close();
     }
+
+
     public List<Credit> getAllCredits() {
         return creditRepository.findAll();
     }

@@ -54,7 +54,7 @@ public class ItemController {
     // Obtener todos los artículos por ID de usuario
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<ItemResponseDTO>> getItemsByUser(@PathVariable Long userId) {
-        List<Item> items = itemService.getItemsByUserId(userId); // <-- lo debes tener en tu servicio
+        List<Item> items = itemService.getItemsByUserId(userId);
         List<ItemResponseDTO> dtoList = items.stream()
                 .map(ItemMapper::toDTO)
                 .toList();
@@ -155,7 +155,7 @@ public class ItemController {
         }
 
         itemService.deleteItem(itemId);
-        return ResponseEntity.noContent().build(); // 204 sin contenido
+        return ResponseEntity.noContent().build();
     }
 
     // Obtener todos los artículos disponibles

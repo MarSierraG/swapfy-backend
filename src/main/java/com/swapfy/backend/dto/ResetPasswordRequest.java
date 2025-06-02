@@ -17,8 +17,6 @@ public class ResetPasswordRequest {
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String newPassword;
 
-    // Getters y setters
-
     public String getEmail() {
         return email;
     }

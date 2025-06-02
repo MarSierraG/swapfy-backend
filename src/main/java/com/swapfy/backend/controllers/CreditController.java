@@ -55,7 +55,7 @@ public class CreditController {
     public void downloadExtract(@PathVariable Long userId, HttpServletResponse response) throws IOException {
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=extracto_creditos_swapfy.pdf");
-        creditService.exportCreditExtract(userId, response); // ✅ llamado al método ya existente
+        creditService.exportCreditExtract(userId, response);
     }
 
     @PutMapping("/{creditId}")
@@ -69,10 +69,4 @@ public class CreditController {
         creditService.deleteCredit(creditId);
         return ResponseEntity.ok().build();
     }
-
-
-
-
-
-
 }

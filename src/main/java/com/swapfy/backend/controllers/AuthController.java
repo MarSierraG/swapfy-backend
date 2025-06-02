@@ -40,7 +40,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
 
-        // Si no hay errores, registra el usuario
+        // Si no hay errores, se registra el usuario
         User registeredUser = authService.registerUser(user);
         return ResponseEntity.ok(registeredUser);
     }
@@ -108,7 +108,5 @@ public class AuthController {
             return ResponseEntity.status(404).body(response);
         }
     }
-
-
 
 }

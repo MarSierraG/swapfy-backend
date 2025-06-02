@@ -58,7 +58,7 @@ public class TagController {
         Tag tag = tagService.getTagById(id)
                 .orElseThrow(() -> new RuntimeException("Etiqueta no encontrada"));
 
-        // Si la etiqueta está en uso y no se ha forzado la edición
+
         if (!force && tag.getItems() != null && !tag.getItems().isEmpty()) {
             throw new TagInUseException("Esta etiqueta está siendo usada por uno o más artículos.");
         }
