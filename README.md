@@ -16,9 +16,8 @@
 
 - Registro y login de usuarios
 - Roles (`USER`, `ADMIN`) con control de permisos
-- Gestión de artículos, etiquetas, valoraciones, logros y mensajes
+- Gestión de artículos, etiquetas, valoraciones y mensajes
 - Intercambio de artículos entre usuarios
-- Sistema de logros y puntuaciones
 - Configuración CORS para conexión con Angular
 - Validaciones personalizadas y manejo de errores
 
