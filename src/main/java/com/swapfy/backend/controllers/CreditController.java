@@ -71,11 +71,11 @@ public class CreditController {
 
     @GetMapping("/extract")
     public void downloadExtract(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Long userId = Long.valueOf( // obtienes el ID directamente del usuario autenticado
-                userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
-                        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"))
-                        .getUserId()
-        );
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Long userId = userRepository.findByEmail(email.trim().toLowerCase()) // 👈 esta es la única línea cambiada
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"))
+                .getUserId();
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth.getAuthorities().stream()
@@ -91,7 +91,6 @@ public class CreditController {
         response.setHeader("Content-Disposition", "attachment; filename=extracto_creditos_swapfy.pdf");
         creditService.exportCreditExtract(userId, response);
     }
-
 
 
 
