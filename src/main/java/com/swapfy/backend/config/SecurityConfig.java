@@ -53,6 +53,7 @@ public class SecurityConfig {
 
                         // Ver transacciones personales
                         .requestMatchers(HttpMethod.GET, "/api/transactions/user/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/credits/extract").authenticated()
 
                         // El resto de transacciones solo admin
                         .requestMatchers("/api/transactions/**").hasRole("ADMIN")
