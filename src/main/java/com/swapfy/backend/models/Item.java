@@ -48,10 +48,10 @@ public class Item {
     private Integer creditValue;
 
     @Column(nullable = false)
-    private String status = "Available";  // Usar 'status' en lugar de 'available'
+    private String status = "Available";
 
     @Column(name = "publication_date", nullable = false, updatable = false)
-    private Instant publicationDate;  // Cambiado a Instant
+    private Instant publicationDate;
 
     @PrePersist
     protected void onCreate() {

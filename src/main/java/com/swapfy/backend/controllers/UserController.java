@@ -26,7 +26,7 @@ public class UserController {
         this.securityService = securityService;
     }
 
-    // Eliminar un usuario (admin o sí mismo)
+    // Eliminar un usuario
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         User authUser = securityService.getAuthenticatedUser();

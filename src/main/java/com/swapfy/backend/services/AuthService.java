@@ -55,7 +55,7 @@ public class AuthService {
 
         // Setear contraseña, créditos y fecha de registro
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setCredits(100); // inicializar créditos
+        user.setCredits(100);
         user.setRegistrationDate(Instant.now());
 
 
@@ -78,7 +78,7 @@ public class AuthService {
             throw new RuntimeException("Usuario no encontrado");
         }
 
-        User user = optionalUser.get(); // Extraemos el usuario
+        User user = optionalUser.get();
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Credenciales incorrectas");
@@ -89,17 +89,17 @@ public class AuthService {
 
     }
 
-    // Validar si el email es válido
+
     private boolean isValidEmail(String email) {
         return email != null && email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
     }
 
-    // Validar si la contraseña es fuerte
+
     private boolean isPasswordStrong(String password) {
         return password.length() >= 8 &&
-                password.matches(".*\\d.*") &&        // al menos un número
-                password.matches(".*[a-zA-Z].*") &&   // al menos una letra
-                password.matches(".*[^a-zA-Z0-9].*"); // al menos un símbolo
+                password.matches(".*\\d.*") &&
+                password.matches(".*[a-zA-Z].*") &&
+                password.matches(".*[^a-zA-Z0-9].*");
     }
 
 
@@ -123,7 +123,6 @@ public class AuthService {
         String encodedPassword = passwordEncoder.encode(newPassword);
         user.setPassword(encodedPassword);
 
-        // Limpiar código para que no se reutilice
         user.setResetCode(null);
 
         userRepository.save(user);

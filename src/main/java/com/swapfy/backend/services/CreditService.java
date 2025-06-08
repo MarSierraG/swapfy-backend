@@ -81,7 +81,7 @@ public class CreditService {
         watermark.setAbsolutePosition(document.right() - 70, document.top() - 70);
         watermark.scaleToFit(70, 70); // tamaño
 
-        PdfContentByte canvas = writer.getDirectContentUnder(); // fondo
+        PdfContentByte canvas = writer.getDirectContentUnder();
         canvas.addImage(watermark);
 
         Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
@@ -154,10 +154,10 @@ public class CreditService {
         User user = credit.getUser();
 
         // Revertir el efecto del crédito en el usuario
-        int revertedAmount = -credit.getAmount(); // si era -1, ahora +1
+        int revertedAmount = -credit.getAmount();
         user.setCredits(user.getCredits() + revertedAmount);
 
-        userRepository.save(user); // guardar nuevo total
+        userRepository.save(user);
         creditRepository.deleteById(creditId);
     }
 

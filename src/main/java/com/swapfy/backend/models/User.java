@@ -42,7 +42,7 @@ public class User {
     @JoinColumn(name = "role_id")
     private Role role;
 
-    // Asociación con ítems: si el usuario se borra, se borran sus ítems
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items;
 

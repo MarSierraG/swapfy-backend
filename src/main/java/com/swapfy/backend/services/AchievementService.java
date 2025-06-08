@@ -27,7 +27,6 @@ public class AchievementService {
     }
 
     public Achievement createAchievement(Achievement achievement) {
-        // Verifica si ya existe un logro con el mismo nombre
         List<Achievement> existing = achievementRepository.findByName(achievement.getName());
 
         if (!existing.isEmpty()) {

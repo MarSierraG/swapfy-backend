@@ -11,7 +11,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "swapfySuperSecretKey1234567890"; // usa una clave larga
+    private final String SECRET_KEY = "swapfySuperSecretKey1234567890";
 
     // Generar token
     public String generateToken(String email, String name, Long userId) {
