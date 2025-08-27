@@ -1,10 +1,11 @@
 package com.swapfy.backend.config;
 
 import com.swapfy.backend.security.JwtFilter;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -14,7 +15,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.*;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
@@ -34,39 +37,32 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   @Qualifier("apiCorsConfigurationSource") CorsConfigurationSource corsSource) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .cors(cors -> {}) // usa el bean corsConfigurationSource() + FilterRegistrationBean
+                // Usa explícitamente TU CorsConfigurationSource para evitar ambigüedad
+                .cors(cors -> cors.configurationSource(corsSource))
                 .authorizeHttpRequests(auth -> auth
-                        // Preflight CORS
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // Endpoints públicos
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // preflight
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/check-email").permitAll()
 
-                        // Transacciones: solo admin
                         .requestMatchers(HttpMethod.POST, "/api/transactions/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/transactions/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/transactions/**").hasRole("ADMIN")
 
-                        // Ver transacciones personales
                         .requestMatchers(HttpMethod.GET, "/api/transactions/user/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/credits/extract").authenticated()
 
-                        // El resto de transacciones solo admin
                         .requestMatchers("/api/transactions/**").hasRole("ADMIN")
 
-                        // Etiquetas (tags)
                         .requestMatchers(HttpMethod.GET, "/api/tags").authenticated()
                         .requestMatchers("/api/tags/**").hasRole("ADMIN")
 
-                        // Actualizar usuarios
                         .requestMatchers(HttpMethod.PUT, "/api/users/**").authenticated()
 
-                        // Cualquier otro endpoint
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -74,7 +70,8 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
+    // Da un NOMBRE a tu bean de CORS para poder "qualificarlo"
+    @Bean(name = "apiCorsConfigurationSource")
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cors = new CorsConfiguration();
         cors.setAllowedOriginPatterns(List.of(
@@ -84,7 +81,7 @@ public class SecurityConfig {
         ));
         cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cors.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
-        cors.setExposedHeaders(List.of("Authorization")); // solo si devuelves el token en header
+        cors.setExposedHeaders(List.of("Authorization")); // solo si usas el token en header
         cors.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -92,9 +89,10 @@ public class SecurityConfig {
         return source;
     }
 
-    // Muy importante: que el CORS se ejecute antes que todo lo demás
+    // Inyecta explícitamente TU bean (evita chocar con mvcHandlerMappingIntrospector)
     @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilterRegistration(CorsConfigurationSource source) {
+    public FilterRegistrationBean<CorsFilter> corsFilterRegistration(
+            @Qualifier("apiCorsConfigurationSource") CorsConfigurationSource source) {
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
