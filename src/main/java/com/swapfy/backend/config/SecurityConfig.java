@@ -42,7 +42,6 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Usa explícitamente TU CorsConfigurationSource para evitar ambigüedad
                 .cors(cors -> cors.configurationSource(corsSource))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // preflight
@@ -62,7 +61,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/tags/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.PUT, "/api/users/**").authenticated()
-
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -70,18 +68,16 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Da un NOMBRE a tu bean de CORS para poder "qualificarlo"
     @Bean(name = "apiCorsConfigurationSource")
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cors = new CorsConfiguration();
         cors.setAllowedOriginPatterns(List.of(
                 "http://localhost:4200",
-                "https://swapfy-frontend.vercel.app",
-                "https://*.vercel.app"
+                "https://swapfy-frontend.vercel.app"
         ));
         cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cors.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
-        cors.setExposedHeaders(List.of("Authorization")); // solo si usas el token en header
+        cors.setExposedHeaders(List.of("Authorization"));
         cors.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -89,7 +85,6 @@ public class SecurityConfig {
         return source;
     }
 
-    // Inyecta explícitamente TU bean (evita chocar con mvcHandlerMappingIntrospector)
     @Bean
     public FilterRegistrationBean<CorsFilter> corsFilterRegistration(
             @Qualifier("apiCorsConfigurationSource") CorsConfigurationSource source) {

@@ -5,7 +5,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +20,6 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService customUserDetailsService;
 
-    @Autowired
     public JwtFilter(JwtUtil jwtUtil, CustomUserDetailsService customUserDetailsService) {
         this.jwtUtil = jwtUtil;
         this.customUserDetailsService = customUserDetailsService;
@@ -33,9 +31,13 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
 
-        // 1) Preflight CORS: no tocar, dejar pasar
+        // 1) Preflight CORS: responder directamente con headers
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            chain.doFilter(request, response);
+            response.setHeader("Access-Control-Allow-Origin", "https://swapfy-frontend.vercel.app");
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, X-Requested-With, Accept, Origin");
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
 
@@ -48,7 +50,6 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 email = jwtUtil.extractEmail(token);
             } catch (Exception e) {
-                // Token inválido/expirado: no autenticamos; Spring Security decidirá (401 si el endpoint lo requiere)
                 chain.doFilter(request, response);
                 return;
             }
