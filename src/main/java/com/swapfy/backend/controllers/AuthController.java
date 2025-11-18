@@ -95,14 +95,18 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> sendResetCode(@RequestBody Map<String, String> body) {
         String email = body.get("email");
 
+        System.out.println("Recibida solicitud para restablecer contraseña para el correo: " + email);  // Log cuando se recibe la solicitud
+
         boolean success = authService.sendResetCode(email);
 
         Map<String, String> response = new HashMap<>();
 
         if (success) {
+            System.out.println("Código de restablecimiento enviado a: " + email);  // Log cuando el código se envía correctamente
             response.put("message", "Código enviado al correo si existe una cuenta con ese email");
             return ResponseEntity.ok(response);
         } else {
+            System.out.println("No se encontró ninguna cuenta con ese correo: " + email);  // Log si no se encuentra el correo
             response.put("message", "No se encontró ninguna cuenta con ese email");
             return ResponseEntity.status(404).body(response);
         }
