@@ -33,7 +33,7 @@ public class EmailService {
 
             log.info("[EmailService] Enviando email a {}", to);
             mailSender.send(message);
-            S log.info("[EmailService] Email enviado correctamente a {}", to);
+            log.info("[EmailService] Email enviado correctamente a {}", to);
         } catch (Exception e) {
             log.error("[EmailService] ERROR enviando email a {}: {}", to, e.getMessage(), e);
             e.printStackTrace();
