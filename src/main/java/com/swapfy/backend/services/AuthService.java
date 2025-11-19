@@ -159,8 +159,16 @@ public class AuthService {
             return false;
         }
 
-        // Enviar correo real ✉️
-        emailService.sendResetCode(email, code);
+        // Enviar correo real
+        try {
+            System.out.println("Llamando a EmailService para enviar el código...");
+            emailService.sendResetCode(email, code);
+            System.out.println("EmailService terminó sin excepciones");
+        } catch (Exception e) {
+            System.out.println("ERROR en EmailService.sendResetCode: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
 
         return true;
     }
