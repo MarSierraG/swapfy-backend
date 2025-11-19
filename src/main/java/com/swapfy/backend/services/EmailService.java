@@ -5,11 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class EmailService {
 
     private final JavaMailSender mailSender;
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     @Autowired
     public EmailService(JavaMailSender mailSender) {
@@ -17,7 +20,7 @@ public class EmailService {
     }
 
     public void sendResetCode(String to, String code) {
-        System.out.println("[EmailService] Preparando email para: " + to + " con código: " + code);
+        log.info("[EmailService] Preparando email para: {} con código: {}", to, code);
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -28,11 +31,11 @@ public class EmailService {
             // opcional pero recomendable:
             // message.setFrom("swapfy.noreply@gmail.com");
 
-            System.out.println("[EmailService] Enviando email...");
+            log.info("[EmailService] Enviando email a {}", to);
             mailSender.send(message);
-            System.out.println("[EmailService] Email enviado correctamente a: " + to);
+            S log.info("[EmailService] Email enviado correctamente a {}", to);
         } catch (Exception e) {
-            System.out.println("[EmailService] ERROR enviando email a " + to + ": " + e.getMessage());
+            log.error("[EmailService] ERROR enviando email a {}: {}", to, e.getMessage(), e);
             e.printStackTrace();
             // re-lanzamos para que AuthService pueda decidir qué hacer
             throw new RuntimeException("Error enviando email", e);

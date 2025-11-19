@@ -7,6 +7,8 @@ import com.swapfy.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.validation.Valid;
 
@@ -19,6 +21,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     @Autowired
     private EmailService emailService;
@@ -131,11 +134,11 @@ public class AuthService {
 
 
     public boolean sendResetCode(String email) {
-        System.out.println(" Buscando usuario con email: " + email);
+        log.info("[AuthService] Buscando usuario con email: {}", email);
         Optional<User> optionalUser = userRepository.findByEmailIgnoreCase(email.trim());
 
         if (optionalUser.isEmpty()) {
-            System.out.println(" Usuario no encontrado");
+            log.info("[AuthService] Usuario no encontrado para email: {}", email);
             return false;
         }
 
@@ -146,26 +149,26 @@ public class AuthService {
         // Generar código aleatorio de 6 dígitos
         String code = String.valueOf((int)(Math.random() * 900000) + 100000);
 
-        System.out.println(" Usuario encontrado. Código generado: " + code);
+        log.info("[AuthService] Usuario encontrado. Código generado: {} para email: {}", code, email);
 
         user.setResetCode(code);
 
         try {
             userRepository.save(user);
-            System.out.println(" Código guardado correctamente");
+            log.info("[AuthService] Código guardado correctamente para usuario con email: {}", email);
         } catch (Exception e) {
-            System.out.println(" Error al guardar el código: " + e.getMessage());
+            log.error("[AuthService] Error al guardar el código para {}: {}", email, e.getMessage(), e);
             e.printStackTrace();
             return false;
         }
 
         // Enviar correo real
         try {
-            System.out.println("Llamando a EmailService para enviar el código...");
+            log.info("[AuthService] Llamando a EmailService para enviar el código...");
             emailService.sendResetCode(email, code);
-            System.out.println("EmailService terminó sin excepciones");
+            log.info("[AuthService] EmailService terminó sin excepciones");
         } catch (Exception e) {
-            System.out.println("ERROR en EmailService.sendResetCode: " + e.getMessage());
+            log.error("[AuthService] ERROR en EmailService.sendResetCode para {}: {}", email, e.getMessage(), e);
             e.printStackTrace();
             return false;
         }

@@ -5,6 +5,8 @@ import com.swapfy.backend.dto.UserDTO;
 import com.swapfy.backend.models.User;
 import com.swapfy.backend.services.AuthService;
 import com.swapfy.backend.security.JwtUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtUtil jwtUtil;
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     public AuthController(AuthService authService, JwtUtil jwtUtil) {
@@ -95,18 +98,18 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> sendResetCode(@RequestBody Map<String, String> body) {
         String email = body.get("email");
 
-        System.out.println("Recibida solicitud para restablecer contraseña para el correo: " + email);  // Log cuando se recibe la solicitud
+        log.info("[AuthController] Recibida solicitud forgot-password para: {}", email);
 
         boolean success = authService.sendResetCode(email);
 
         Map<String, String> response = new HashMap<>();
 
         if (success) {
-            System.out.println("Código de restablecimiento enviado a: " + email);  // Log cuando el código se envía correctamente
+            log.info("[AuthController] Código de restablecimiento enviado a: {}", email);
             response.put("message", "Código enviado al correo si existe una cuenta con ese email");
             return ResponseEntity.ok(response);
         } else {
-            System.out.println("No se encontró ninguna cuenta con ese correo: " + email);  // Log si no se encuentra el correo
+            log.info("[AuthController] No se encontró ninguna cuenta con el correo: {}", email);
             response.put("message", "No se encontró ninguna cuenta con ese email");
             return ResponseEntity.status(404).body(response);
         }
